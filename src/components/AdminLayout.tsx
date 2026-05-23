@@ -5,14 +5,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const NAV = [
+const NAV: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/categories", label: "Categories", icon: FolderTree },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/messages", label: "Messages", icon: MessageSquare },
   { to: "/admin/banners", label: "Banners", icon: ImageIcon },
-] as const;
+];
 
 export function AdminLayout() {
   const { user, isAdmin, loading } = useAuth();
