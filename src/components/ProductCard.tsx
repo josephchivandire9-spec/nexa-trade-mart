@@ -1,49 +1,42 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, Star, MessageCircle, Loader2 } from "lucide-react";
-import { ShopifyProduct, formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
+import { ShoppingBag, Star, MessageCircle } from "lucide-react";
+import { type Product, formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 
-export function ProductCard({ p }: { p: ShopifyProduct }) {
-  const variant = p.node.variants.edges[0]?.node;
-  const image = p.node.images.edges[0]?.node;
-  const price = variant?.price.amount ?? p.node.priceRange.minVariantPrice.amount;
-  const compareAt = variant?.compareAtPrice?.amount;
-  const hasDiscount = compareAt && parseFloat(compareAt) > parseFloat(price);
-  const discountPct = hasDiscount
-    ? Math.round(((parseFloat(compareAt) - parseFloat(price)) / parseFloat(compareAt)) * 100)
+export function ProductCard({ p }: { p: Product }) {
+  const hasDiscount =
+    p.compare_at_price && p.compare_at_price > p.price;
+  const discountPct = p.discount_pct
+    ? p.discount_pct
+    : hasDiscount
+    ? Math.round(((p.compare_at_price! - p.price) / p.compare_at_price!) * 100)
     : 0;
 
   const addItem = useCartStore((s) => s.addItem);
-  const isLoading = useCartStore((s) => s.isLoading);
 
-  const badge = p.node.tags.find((t) =>
-    ["Best Seller", "Hot Deal", "Limited Offer", "Free Gift Eligible", "New"].includes(t),
-  );
-
-  async function handleAdd() {
-    if (!variant) return;
-    await addItem({
-      product: p,
-      variantId: variant.id,
-      variantTitle: variant.title,
-      price: variant.price,
-      quantity: 1,
-      selectedOptions: variant.selectedOptions || [],
+  function handleAdd() {
+    addItem({
+      productId: p.id,
+      name: p.name,
+      slug: p.slug,
+      price: p.price,
+      image_url: p.image_url,
+      stock: p.stock,
     });
-    toast.success("Added to cart", { description: p.node.title, position: "top-center" });
+    toast.success("Added to cart", { description: p.name });
   }
 
-  const waMsg = `Hi NEXA TRADE MART, I'd like to order:\n\n• ${p.node.title}\n• Price: ${formatZAR(price)}\n• Link: ${typeof window !== "undefined" ? window.location.origin : ""}/product/${p.node.handle}`;
+  const waMsg = `Hi NEXA TRADE MART, I'd like to order:\n\n• ${p.name}\n• Price: ${formatZAR(p.price)}`;
 
   return (
     <article className="group relative bg-card border border-border rounded-2xl overflow-hidden card-hover">
-      <Link to="/product/$handle" params={{ handle: p.node.handle }} className="block">
+      <Link to="/product/$handle" params={{ handle: p.slug }} className="block">
         <div className="relative aspect-square bg-secondary overflow-hidden">
-          {image ? (
+          {p.image_url ? (
             <img
-              src={image.url}
-              alt={image.altText ?? p.node.title}
+              src={p.image_url}
+              alt={p.name}
               loading="lazy"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
@@ -53,45 +46,56 @@ export function ProductCard({ p }: { p: ShopifyProduct }) {
             </div>
           )}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-            {hasDiscount && (
+            {discountPct > 0 && (
               <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-destructive text-destructive-foreground shadow-premium">
                 -{discountPct}%
               </span>
             )}
-            {badge && (
+            {p.is_featured && (
               <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold gradient-gold text-ink shadow-gold">
-                {badge}
+                Featured
+              </span>
+            )}
+            {p.stock === 0 && (
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-muted text-foreground">
+                Out of stock
               </span>
             )}
           </div>
         </div>
       </Link>
       <div className="p-4">
-        <div className="text-[10px] uppercase tracking-widest text-gold-deep mb-1">{p.node.productType}</div>
-        <Link to="/product/$handle" params={{ handle: p.node.handle }}>
+        {p.category?.name && (
+          <div className="text-[10px] uppercase tracking-widest text-gold-deep mb-1">{p.category.name}</div>
+        )}
+        <Link to="/product/$handle" params={{ handle: p.slug }}>
           <h3 className="font-semibold text-sm sm:text-base leading-tight line-clamp-2 hover:text-gold-deep transition">
-            {p.node.title}
+            {p.name}
           </h3>
         </Link>
         <div className="flex items-center gap-1 mt-1.5 text-gold">
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="h-3 w-3 fill-current" />
           ))}
-          <span className="text-[11px] text-muted-foreground ml-1">In stock</span>
+          <span className="text-[11px] text-muted-foreground ml-1">
+            {p.stock > 0 ? "In stock" : "Sold out"}
+          </span>
         </div>
         <div className="flex items-baseline gap-2 mt-2">
-          <span className="font-display text-lg font-bold text-ink">{formatZAR(price)}</span>
+          <span className="font-display text-lg font-bold text-ink">{formatZAR(p.price)}</span>
           {hasDiscount && (
-            <span className="text-xs text-muted-foreground line-through">{formatZAR(compareAt!)}</span>
+            <span className="text-xs text-muted-foreground line-through">
+              {formatZAR(p.compare_at_price!)}
+            </span>
           )}
         </div>
         <div className="mt-3 flex gap-2">
           <button
             onClick={handleAdd}
-            disabled={isLoading || !variant?.availableForSale}
+            disabled={p.stock === 0}
             className="flex-1 inline-flex items-center justify-center gap-1.5 h-10 rounded-lg bg-ink text-white text-xs font-semibold hover:bg-ink-soft transition disabled:opacity-50"
           >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShoppingBag className="h-4 w-4" />}
+            <ShoppingBag className="h-4 w-4" />
             Add to Cart
           </button>
           <a

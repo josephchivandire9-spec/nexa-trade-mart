@@ -2,8 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
-import { useProducts } from "@/hooks/useProducts";
-import { CATEGORIES, ShopifyProduct } from "@/lib/shopify";
+import { useProducts, useCategories } from "@/hooks/useProducts";
 import { z } from "zod";
 
 const shopSearchSchema = z.object({
@@ -17,7 +16,7 @@ export const Route = createFileRoute("/shop")({
   head: () => ({
     meta: [
       { title: "Shop — NEXA TRADE MART" },
-      { name: "description", content: "Browse premium products across clothing, shoes, electronics, phones, household & beauty. Filter, sort and shop the latest deals." },
+      { name: "description", content: "Browse premium products across clothing, shoes, electronics, phones, household & beauty." },
       { property: "og:title", content: "Shop — NEXA TRADE MART" },
       { property: "og:url", content: "/shop" },
     ],
@@ -32,39 +31,34 @@ function ShopPage() {
   const [q, setQ] = useState(search.q ?? "");
   const [priceMax, setPriceMax] = useState<number>(0);
 
-  const cat = CATEGORIES.find((c) => c.slug === search.category);
-  const sfQuery = cat ? `product_type:${cat.type}` : undefined;
+  const { data: categories = [] } = useCategories();
+  const { data: products = [], isLoading } = useProducts({ categorySlug: search.category });
 
-  const { data: products = [], isLoading } = useProducts(sfQuery, 100);
+  const currentCat = categories.find((c) => c.slug === search.category);
 
   const filtered = useMemo(() => {
-    let list: ShopifyProduct[] = products;
+    let list = products;
     if (q.trim()) {
       const term = q.toLowerCase();
       list = list.filter(
         (p) =>
-          p.node.title.toLowerCase().includes(term) ||
-          p.node.tags.some((t) => t.toLowerCase().includes(term)) ||
-          p.node.productType?.toLowerCase().includes(term),
+          p.name.toLowerCase().includes(term) ||
+          p.description?.toLowerCase().includes(term) ||
+          p.category?.name.toLowerCase().includes(term),
       );
     }
-    if (priceMax > 0) {
-      list = list.filter((p) => parseFloat(p.node.priceRange.minVariantPrice.amount) <= priceMax);
-    }
+    if (priceMax > 0) list = list.filter((p) => p.price <= priceMax);
     const sort = search.sort ?? "featured";
-    if (sort === "price-asc") list = [...list].sort((a, b) => +a.node.priceRange.minVariantPrice.amount - +b.node.priceRange.minVariantPrice.amount);
-    if (sort === "price-desc") list = [...list].sort((a, b) => +b.node.priceRange.minVariantPrice.amount - +a.node.priceRange.minVariantPrice.amount);
+    if (sort === "price-asc") list = [...list].sort((a, b) => a.price - b.price);
+    if (sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
     if (sort === "discount") {
       list = [...list].sort((a, b) => {
-        const da = a.node.variants.edges[0]?.node?.compareAtPrice
-          ? +a.node.variants.edges[0].node.compareAtPrice!.amount - +a.node.variants.edges[0].node.price.amount
-          : 0;
-        const db = b.node.variants.edges[0]?.node?.compareAtPrice
-          ? +b.node.variants.edges[0].node.compareAtPrice!.amount - +b.node.variants.edges[0].node.price.amount
-          : 0;
+        const da = a.compare_at_price ? a.compare_at_price - a.price : 0;
+        const db = b.compare_at_price ? b.compare_at_price - b.price : 0;
         return db - da;
       });
     }
+    if (sort === "featured") list = [...list].sort((a, b) => Number(b.is_featured) - Number(a.is_featured));
     return list;
   }, [products, q, priceMax, search.sort]);
 
@@ -73,22 +67,29 @@ function ShopPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <span className="text-[11px] uppercase tracking-[0.4em] text-gold-deep">Catalog</span>
-          <h1 className="mt-2 font-display text-3xl sm:text-4xl">{cat?.title ?? "Shop All"}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{cat?.blurb ?? "Premium retail across every category."}</p>
+          <h1 className="mt-2 font-display text-3xl sm:text-4xl">{currentCat?.name ?? "Shop All"}</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {currentCat?.description ?? "Premium retail across every category."}
+          </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {[
-            { v: undefined as string | undefined, l: "All" },
-            ...CATEGORIES.map((c) => ({ v: c.slug, l: c.title })),
-          ].map((opt) => (
+          <button
+            onClick={() => navigate({ search: { ...search, category: undefined } as never })}
+            className={`px-3 h-9 rounded-full border text-xs font-semibold transition ${
+              !search.category ? "bg-ink text-white border-ink" : "border-border hover:border-gold hover:text-gold-deep"
+            }`}
+          >
+            All
+          </button>
+          {categories.map((c) => (
             <button
-              key={opt.l}
-              onClick={() => navigate({ search: { ...search, category: opt.v } as never })}
+              key={c.slug}
+              onClick={() => navigate({ search: { ...search, category: c.slug } as never })}
               className={`px-3 h-9 rounded-full border text-xs font-semibold transition ${
-                search.category === opt.v ? "bg-ink text-white border-ink" : "border-border hover:border-gold hover:text-gold-deep"
+                search.category === c.slug ? "bg-ink text-white border-ink" : "border-border hover:border-gold hover:text-gold-deep"
               }`}
             >
-              {opt.l}
+              {c.name}
             </button>
           ))}
         </div>
@@ -148,13 +149,13 @@ function ShopPage() {
           ) : filtered.length === 0 ? (
             <div className="rounded-2xl border border-dashed bg-secondary/40 p-10 text-center">
               <p className="text-muted-foreground">No products found.</p>
-              <p className="text-sm mt-1">Try clearing filters or pick a different category.</p>
+              <p className="text-sm mt-1">Add products from the admin dashboard to populate this catalog.</p>
             </div>
           ) : (
             <>
               <div className="text-xs text-muted-foreground mb-4">{filtered.length} products</div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-                {filtered.map((p) => <ProductCard key={p.node.id} p={p} />)}
+                {filtered.map((p) => <ProductCard key={p.id} p={p} />)}
               </div>
             </>
           )}

@@ -1,94 +1,126 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { Mail, Phone, MessageCircle, MapPin, Loader2, Send } from "lucide-react";
 import { z } from "zod";
-import { Mail, Phone, MapPin, MessageCircle, Clock, Send } from "lucide-react";
-import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, SUPPORT_EMAIL, SUPPORT_PHONE, buildWhatsAppOrderLink } from "@/lib/shopify";
+import { supabase } from "@/integrations/supabase/client";
+import { WHATSAPP_NUMBER, SUPPORT_EMAIL, SUPPORT_PHONE } from "@/lib/shopify";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact Us — NEXA TRADE MART" },
-      { name: "description", content: "Reach NEXA TRADE MART by WhatsApp, email or phone. We're here to help during working hours." },
+      { title: "Contact — NEXA TRADE MART" },
+      { name: "description", content: "Get in touch with NEXA TRADE MART. We respond fast via WhatsApp, phone, or email." },
+      { property: "og:title", content: "Contact NEXA TRADE MART" },
       { property: "og:url", content: "/contact" },
     ],
     links: [{ rel: "canonical", href: "/contact" }],
   }),
-  component: Contact,
+  component: ContactPage,
 });
 
 const schema = z.object({
-  name: z.string().trim().min(1).max(80),
-  phone: z.string().trim().min(7).max(20),
-  message: z.string().trim().min(1).max(1000),
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(200),
+  phone: z.string().trim().max(30).optional().or(z.literal("")),
+  subject: z.string().trim().max(200).optional().or(z.literal("")),
+  message: z.string().trim().min(1).max(2000),
 });
 
-function Contact() {
-  const [form, setForm] = useState({ name: "", phone: "", message: "" });
+function ContactPage() {
+  const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const r = schema.safeParse(form);
-    if (!r.success) {
-      toast.error("Please fill all fields correctly.");
-      return;
+    const parsed = schema.safeParse(form);
+    if (!parsed.success) {
+      return toast.error(parsed.error.issues[0].message);
     }
-    const msg = `New enquiry from NEXA website:\n\nName: ${form.name}\nPhone: ${form.phone}\n\nMessage:\n${form.message}`;
-    window.open(buildWhatsAppOrderLink(msg), "_blank");
-    toast.success("Opening WhatsApp…");
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("contact_messages").insert({
+        name: parsed.data.name,
+        email: parsed.data.email,
+        phone: parsed.data.phone || null,
+        subject: parsed.data.subject || null,
+        message: parsed.data.message,
+      });
+      if (error) throw error;
+      toast.success("Message sent! We'll get back to you shortly.");
+      setForm({ name: "", email: "", phone: "", subject: "", message: "" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not send message");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
+  const input = "w-full h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:border-gold";
+
   return (
-    <div className="container-px mx-auto max-w-7xl py-14">
+    <div className="container-px mx-auto max-w-5xl py-12 sm:py-16">
       <div className="text-center">
-        <span className="text-[11px] uppercase tracking-[0.4em] text-gold-deep">Reach out</span>
-        <h1 className="mt-2 font-display text-4xl sm:text-5xl">Contact Us</h1>
-        <p className="mt-3 text-muted-foreground max-w-xl mx-auto">Questions, orders or feedback — we'd love to hear from you.</p>
+        <span className="text-[11px] uppercase tracking-[0.4em] text-gold-deep">Get In Touch</span>
+        <h1 className="mt-2 font-display text-4xl">We're here to help</h1>
+        <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
+          Reach out by WhatsApp for the fastest response, or send us a message below.
+        </p>
       </div>
 
-      <div className="mt-12 grid lg:grid-cols-[1fr_1.2fr] gap-8">
-        <div className="space-y-4">
-          {[
-            { Icon: MessageCircle, t: "WhatsApp", d: WHATSAPP_DISPLAY, href: `https://wa.me/${WHATSAPP_NUMBER}` },
-            { Icon: Phone, t: "Support Call Line", d: SUPPORT_PHONE, href: `tel:${SUPPORT_PHONE}` },
-            { Icon: Mail, t: "Email", d: SUPPORT_EMAIL, href: `mailto:${SUPPORT_EMAIL}` },
-            { Icon: MapPin, t: "Location", d: "Port Elizabeth / Gqeberha, ZA" },
-            { Icon: Clock, t: "Hours", d: "Mon – Sat · 08:00 – 18:00" },
-          ].map((c, i) => {
-            const Wrap = c.href ? "a" : "div";
-            return (
-              <Wrap key={i} {...(c.href ? { href: c.href, target: "_blank", rel: "noreferrer" } : {})} className="block rounded-2xl border border-border bg-card p-5 card-hover">
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-lg gradient-gold text-ink inline-flex items-center justify-center"><c.Icon className="h-5 w-5" /></div>
-                  <div>
-                    <div className="text-xs uppercase tracking-widest text-muted-foreground">{c.t}</div>
-                    <div className="font-medium mt-0.5">{c.d}</div>
-                  </div>
-                </div>
-              </Wrap>
-            );
-          })}
-        </div>
-
-        <form onSubmit={submit} className="rounded-2xl border border-border bg-card p-6 sm:p-8 space-y-4">
-          <h2 className="font-display text-2xl">Send us a message</h2>
-          <p className="text-sm text-muted-foreground">Submitting opens a pre-filled WhatsApp message to our team.</p>
-          <div>
-            <label className="text-xs uppercase tracking-widest text-muted-foreground">Full name</label>
-            <input maxLength={80} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1 w-full h-11 rounded-lg border bg-background px-3" />
+      <div className="mt-10 grid lg:grid-cols-[1fr_1fr] gap-8">
+        <form onSubmit={submit} className="rounded-2xl border bg-card p-6 space-y-3">
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input placeholder="Your name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={input} />
+            <input type="email" placeholder="Email *" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={input} />
           </div>
-          <div>
-            <label className="text-xs uppercase tracking-widest text-muted-foreground">Phone</label>
-            <input maxLength={20} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1 w-full h-11 rounded-lg border bg-background px-3" />
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={input} />
+            <input placeholder="Subject" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className={input} />
           </div>
-          <div>
-            <label className="text-xs uppercase tracking-widest text-muted-foreground">Message</label>
-            <textarea maxLength={1000} rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="mt-1 w-full rounded-lg border bg-background p-3" />
-          </div>
-          <button className="w-full h-12 rounded-lg gradient-gold text-ink font-bold inline-flex items-center justify-center gap-2 shadow-gold">
-            <Send className="h-4 w-4" /> Send via WhatsApp
+          <textarea
+            placeholder="Your message *"
+            rows={5}
+            value={form.message}
+            onChange={(e) => setForm({ ...form, message: e.target.value })}
+            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-gold"
+          />
+          <button disabled={submitting} className="w-full h-11 rounded-lg gradient-gold text-ink font-bold inline-flex items-center justify-center gap-2 disabled:opacity-50">
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            Send Message
           </button>
         </form>
+
+        <div className="space-y-3">
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-2xl border bg-card p-5 card-hover">
+            <div className="h-12 w-12 rounded-full bg-[#25D366]/15 inline-flex items-center justify-center"><MessageCircle className="h-5 w-5 text-[#25D366]" /></div>
+            <div>
+              <div className="font-semibold">WhatsApp</div>
+              <div className="text-sm text-muted-foreground">Chat with us instantly</div>
+            </div>
+          </a>
+          <a href={`tel:${SUPPORT_PHONE}`} className="flex items-center gap-3 rounded-2xl border bg-card p-5 card-hover">
+            <div className="h-12 w-12 rounded-full bg-gold/15 inline-flex items-center justify-center"><Phone className="h-5 w-5 text-gold-deep" /></div>
+            <div>
+              <div className="font-semibold">{SUPPORT_PHONE}</div>
+              <div className="text-sm text-muted-foreground">Call our support line</div>
+            </div>
+          </a>
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="flex items-center gap-3 rounded-2xl border bg-card p-5 card-hover">
+            <div className="h-12 w-12 rounded-full bg-gold/15 inline-flex items-center justify-center"><Mail className="h-5 w-5 text-gold-deep" /></div>
+            <div>
+              <div className="font-semibold">{SUPPORT_EMAIL}</div>
+              <div className="text-sm text-muted-foreground">Email us anytime</div>
+            </div>
+          </a>
+          <div className="flex items-center gap-3 rounded-2xl border bg-card p-5">
+            <div className="h-12 w-12 rounded-full bg-gold/15 inline-flex items-center justify-center"><MapPin className="h-5 w-5 text-gold-deep" /></div>
+            <div>
+              <div className="font-semibold">Port Elizabeth / Gqeberha</div>
+              <div className="text-sm text-muted-foreground">Reliable local delivery</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
