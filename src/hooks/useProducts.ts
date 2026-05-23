@@ -1,24 +1,65 @@
 import { useQuery } from "@tanstack/react-query";
-import { PRODUCTS_QUERY, PRODUCT_BY_HANDLE_QUERY, ShopifyProduct, storefrontApiRequest } from "@/lib/shopify";
+import { supabase } from "@/integrations/supabase/client";
+import type { Product, Category } from "@/lib/shopify";
 
-export function useProducts(query?: string, first = 50) {
+export function useCategories() {
   return useQuery({
-    queryKey: ["products", query ?? "all", first],
-    queryFn: async () => {
-      const data = await storefrontApiRequest(PRODUCTS_QUERY, { first, query: query ?? null });
-      return (data?.data?.products?.edges ?? []) as ShopifyProduct[];
+    queryKey: ["categories"],
+    queryFn: async (): Promise<Category[]> => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as Category[];
     },
     staleTime: 60_000,
   });
 }
 
-export function useProductByHandle(handle: string) {
+interface ProductsFilter {
+  categorySlug?: string;
+  featured?: boolean;
+  limit?: number;
+}
+
+export function useProducts(filter: ProductsFilter = {}) {
   return useQuery({
-    queryKey: ["product", handle],
-    queryFn: async () => {
-      const data = await storefrontApiRequest(PRODUCT_BY_HANDLE_QUERY, { handle });
-      return data?.data?.product ?? null;
+    queryKey: ["products", filter],
+    queryFn: async (): Promise<Product[]> => {
+      let q = supabase
+        .from("products")
+        .select("*, category:categories(name, slug)")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      if (filter.featured) q = q.eq("is_featured", true);
+      if (filter.limit) q = q.limit(filter.limit);
+      const { data, error } = await q;
+      if (error) throw error;
+      let rows = (data ?? []) as unknown as Product[];
+      if (filter.categorySlug) {
+        rows = rows.filter((r) => r.category?.slug === filter.categorySlug);
+      }
+      return rows;
     },
-    enabled: !!handle,
+    staleTime: 30_000,
+  });
+}
+
+export function useProductBySlug(slug: string) {
+  return useQuery({
+    queryKey: ["product", slug],
+    queryFn: async (): Promise<Product | null> => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*, category:categories(name, slug)")
+        .eq("slug", slug)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (error) throw error;
+      return (data ?? null) as Product | null;
+    },
+    enabled: !!slug,
   });
 }

@@ -1,14 +1,3 @@
-import { useEffect } from "react";
-import { useCartStore } from "@/stores/cartStore";
-
-export function useCartSync() {
-  const syncCart = useCartStore((s) => s.syncCart);
-  useEffect(() => {
-    syncCart();
-    const handle = () => {
-      if (document.visibilityState === "visible") syncCart();
-    };
-    document.addEventListener("visibilitychange", handle);
-    return () => document.removeEventListener("visibilitychange", handle);
-  }, [syncCart]);
-}
+// No-op kept for compatibility with the existing root layout.
+// Cart is now local-only (persisted in localStorage); checkout creates a DB order.
+export function useCartSync() {}
