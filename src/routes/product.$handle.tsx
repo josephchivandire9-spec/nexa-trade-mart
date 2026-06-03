@@ -145,14 +145,14 @@ function ProductPage() {
               <ShoppingBag className="h-4 w-4" />
               Add to Cart
             </button>
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="h-12 rounded-lg bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 hover:opacity-95"
+            <button
+              type="button"
+              onClick={() => setOrderOpen(true)}
+              disabled={product.stock === 0}
+              className="h-12 rounded-lg bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 hover:opacity-95 disabled:opacity-50"
             >
               <MessageCircle className="h-4 w-4" /> Order on WhatsApp
-            </a>
+            </button>
           </div>
 
           <div className="mt-8 grid grid-cols-3 gap-3 text-center">
