@@ -63,7 +63,6 @@ function ProductPage() {
     toast.success("Added to cart", { description: product!.name });
   }
 
-  const waMsg = `Hi NEXA TRADE MART, I'd like to order:\n\n• ${product.name}\n• Qty: ${qty}\n• Price: ${formatZAR(product.price)} each\n• Total: ${formatZAR(product.price * qty)}\n\nMy details:\nName:\nPhone:\nDelivery Address:\nNotes:`;
 
   return (
     <div className="container-px mx-auto max-w-7xl py-10 sm:py-14">
