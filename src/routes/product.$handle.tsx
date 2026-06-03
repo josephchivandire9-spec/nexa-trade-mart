@@ -169,6 +169,13 @@ function ProductPage() {
           </div>
         </div>
       </div>
+
+      <OrderModal
+        open={orderOpen}
+        onClose={() => setOrderOpen(false)}
+        title={`Order: ${product.name}`}
+        items={[{ product_id: product.id, name: product.name, price: product.price, quantity: qty }]}
+      />
     </div>
   );
 }
