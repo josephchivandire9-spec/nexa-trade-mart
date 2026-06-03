@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
+import { AIAssistant } from "@/components/AIAssistant";
 import { useCartSync } from "@/hooks/useCartSync";
 
 function NotFoundComponent() {
@@ -115,6 +116,7 @@ function AppShell() {
       </main>
       <Footer />
       <WhatsAppFab />
+      <AIAssistant />
       <Toaster richColors position="top-center" />
     </>
   );

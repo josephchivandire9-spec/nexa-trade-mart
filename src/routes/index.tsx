@@ -101,6 +101,28 @@ function Home() {
         </div>
       </section>
 
+      {/* TRUST STRIP */}
+      <section className="border-y border-border bg-background">
+        <div className="container-px mx-auto max-w-7xl py-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { icon: ShieldCheck, title: "Secure Ordering", body: "Safe & encrypted checkout" },
+            { icon: Star, title: "Trusted Seller", body: "Hundreds of happy customers" },
+            { icon: Truck, title: "Fast Local Delivery", body: "Free over R500 in PE" },
+            { icon: Gift, title: "Satisfaction Guarantee", body: "Quality you can trust" },
+          ].map((t, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-gold/10 text-gold-deep inline-flex items-center justify-center shrink-0">
+                <t.icon className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-semibold leading-tight">{t.title}</div>
+                <div className="text-[11px] text-muted-foreground leading-tight">{t.body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* CATEGORIES */}
       <section className="container-px mx-auto max-w-7xl py-16 sm:py-20">
         <SectionTitle eyebrow="Browse" title="Featured Categories" />
