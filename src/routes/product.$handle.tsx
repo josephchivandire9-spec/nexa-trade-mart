@@ -2,9 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronLeft, ShoppingBag, MessageCircle, Star, ShieldCheck, Truck, Gift } from "lucide-react";
 import { useProductBySlug } from "@/hooks/useProducts";
-import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
+import { formatZAR } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { OrderModal } from "@/components/OrderModal";
 
 export const Route = createFileRoute("/product/$handle")({
   head: ({ params }) => ({
@@ -23,6 +24,7 @@ function ProductPage() {
   const { data: product, isLoading } = useProductBySlug(handle);
   const [imgIdx, setImgIdx] = useState(0);
   const [qty, setQty] = useState(1);
+  const [orderOpen, setOrderOpen] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
 
   if (isLoading) {
@@ -61,7 +63,6 @@ function ProductPage() {
     toast.success("Added to cart", { description: product!.name });
   }
 
-  const waMsg = `Hi NEXA TRADE MART, I'd like to order:\n\n• ${product.name}\n• Qty: ${qty}\n• Price: ${formatZAR(product.price)} each\n• Total: ${formatZAR(product.price * qty)}\n\nMy details:\nName:\nPhone:\nDelivery Address:\nNotes:`;
 
   return (
     <div className="container-px mx-auto max-w-7xl py-10 sm:py-14">
@@ -144,14 +145,14 @@ function ProductPage() {
               <ShoppingBag className="h-4 w-4" />
               Add to Cart
             </button>
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="h-12 rounded-lg bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 hover:opacity-95"
+            <button
+              type="button"
+              onClick={() => setOrderOpen(true)}
+              disabled={product.stock === 0}
+              className="h-12 rounded-lg bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 hover:opacity-95 disabled:opacity-50"
             >
               <MessageCircle className="h-4 w-4" /> Order on WhatsApp
-            </a>
+            </button>
           </div>
 
           <div className="mt-8 grid grid-cols-3 gap-3 text-center">
@@ -168,6 +169,13 @@ function ProductPage() {
           </div>
         </div>
       </div>
+
+      <OrderModal
+        open={orderOpen}
+        onClose={() => setOrderOpen(false)}
+        title={`Order: ${product.name}`}
+        items={[{ product_id: product.id, name: product.name, price: product.price, quantity: qty }]}
+      />
     </div>
   );
 }

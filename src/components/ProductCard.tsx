@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Star, MessageCircle } from "lucide-react";
-import { type Product, formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
+import { type Product, formatZAR } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { OrderModal } from "@/components/OrderModal";
 
 export function ProductCard({ p }: { p: Product }) {
+  const [orderOpen, setOrderOpen] = useState(false);
   const hasDiscount =
     p.compare_at_price && p.compare_at_price > p.price;
   const discountPct = p.discount_pct
@@ -26,8 +29,6 @@ export function ProductCard({ p }: { p: Product }) {
     });
     toast.success("Added to cart", { description: p.name });
   }
-
-  const waMsg = `Hi NEXA TRADE MART, I'd like to order:\n\n• ${p.name}\n• Price: ${formatZAR(p.price)}`;
 
   return (
     <article className="group relative bg-card border border-border rounded-2xl overflow-hidden card-hover">
@@ -98,17 +99,24 @@ export function ProductCard({ p }: { p: Product }) {
             <ShoppingBag className="h-4 w-4" />
             Add to Cart
           </button>
-          <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
+            onClick={() => setOrderOpen(true)}
+            disabled={p.stock === 0}
             aria-label="Order on WhatsApp"
-            className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-[#25D366] text-white hover:opacity-90 transition"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-[#25D366] text-white hover:opacity-90 transition disabled:opacity-50"
           >
             <MessageCircle className="h-4 w-4" />
-          </a>
+          </button>
         </div>
       </div>
+
+      <OrderModal
+        open={orderOpen}
+        onClose={() => setOrderOpen(false)}
+        title={`Order: ${p.name}`}
+        items={[{ product_id: p.id, name: p.name, price: p.price, quantity: 1 }]}
+      />
     </article>
   );
 }
