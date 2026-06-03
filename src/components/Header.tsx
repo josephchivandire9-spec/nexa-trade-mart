@@ -1,9 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, Search, X } from "lucide-react";
+import { Menu, Search, X, Shield, LogIn, LogOut, User } from "lucide-react";
 import { Logo } from "./Logo";
 import { CartDrawer } from "./CartDrawer";
 import { CATEGORIES } from "@/lib/shopify";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -16,6 +19,13 @@ const NAV = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { user, isAdmin } = useAuth();
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    toast.success("Signed out");
+  }
+
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-ink/95 text-white border-b border-white/10">
       <div className="border-b border-gold/20 bg-black/60 text-[11px] tracking-widest uppercase text-gold/90">
@@ -55,6 +65,36 @@ export function Header() {
           >
             <Search className="h-4 w-4" />
           </Link>
+
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="hidden sm:inline-flex h-10 px-3 items-center gap-1.5 rounded-full bg-gold text-ink text-xs font-bold hover:opacity-90 transition"
+              title="Admin Dashboard"
+            >
+              <Shield className="h-3.5 w-3.5" /> Admin
+            </Link>
+          )}
+
+          {user ? (
+            <button
+              onClick={signOut}
+              className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 hover:border-gold hover:text-gold transition"
+              aria-label="Sign out"
+              title={user.email ?? "Account"}
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          ) : (
+            <Link
+              to="/auth"
+              className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 hover:border-gold hover:text-gold transition"
+              aria-label="Sign in"
+            >
+              <LogIn className="h-4 w-4" />
+            </Link>
+          )}
+
           <CartDrawer />
           <button
             className="lg:hidden h-10 w-10 inline-flex items-center justify-center rounded-full border border-white/15"
@@ -79,6 +119,34 @@ export function Header() {
                 {n.label}
               </Link>
             ))}
+
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="mt-3 inline-flex items-center justify-center gap-2 h-11 rounded-full bg-gold text-ink font-bold text-sm"
+              >
+                <Shield className="h-4 w-4" /> Admin Dashboard
+              </Link>
+            )}
+
+            {user ? (
+              <button
+                onClick={() => { setOpen(false); signOut(); }}
+                className="mt-2 inline-flex items-center justify-center gap-2 h-11 rounded-full border border-white/15 text-white/85 text-sm"
+              >
+                <LogOut className="h-4 w-4" /> Sign out ({user.email})
+              </button>
+            ) : (
+              <Link
+                to="/auth"
+                onClick={() => setOpen(false)}
+                className="mt-3 inline-flex items-center justify-center gap-2 h-11 rounded-full border border-gold/40 text-gold text-sm"
+              >
+                <User className="h-4 w-4" /> Sign in / Register
+              </Link>
+            )}
+
             <div className="pt-4 pb-2 text-[11px] uppercase tracking-widest text-white/40">Categories</div>
             {CATEGORIES.map((c) => (
               <Link
