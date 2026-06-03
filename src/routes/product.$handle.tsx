@@ -24,6 +24,7 @@ function ProductPage() {
   const { data: product, isLoading } = useProductBySlug(handle);
   const [imgIdx, setImgIdx] = useState(0);
   const [qty, setQty] = useState(1);
+  const [orderOpen, setOrderOpen] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
 
   if (isLoading) {
