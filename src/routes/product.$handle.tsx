@@ -2,9 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronLeft, ShoppingBag, MessageCircle, Star, ShieldCheck, Truck, Gift } from "lucide-react";
 import { useProductBySlug } from "@/hooks/useProducts";
-import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
+import { formatZAR } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { OrderModal } from "@/components/OrderModal";
 
 export const Route = createFileRoute("/product/$handle")({
   head: ({ params }) => ({
