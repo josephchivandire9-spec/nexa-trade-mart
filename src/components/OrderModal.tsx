@@ -107,9 +107,18 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
         (form.notes.trim() ? `Notes: ${form.notes.trim()}\n` : "");
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
       toast.success("Order sent! We'll confirm on WhatsApp.");
+      // Save updated profile details for signed-in customers
+      if (profile) {
+        updateProfile({
+          full_name: name,
+          phone,
+          address: form.fulfillment === "delivery" ? form.address.trim() : profile.address ?? "",
+        });
+      }
       onSuccess?.();
       onClose();
       setForm({ name: "", phone: "", fulfillment: "delivery", address: "", notes: "" });
+
     } catch (e) {
       console.error(e);
       toast.error("Could not place order. Please try again.");
