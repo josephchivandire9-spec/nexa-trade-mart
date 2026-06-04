@@ -65,32 +65,25 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
 
     setSubmitting(true);
     try {
-      const orderItems = items.map((i) => ({
-        product_id: i.product_id,
-        name: i.name,
-        price: i.price,
-        quantity: i.quantity,
-        line_total: i.price * i.quantity,
-      }));
       const fulfillmentLabel = form.fulfillment === "delivery" ? "Delivery" : "Pickup";
-      const { error } = await supabase.from("orders").insert({
-        customer_name: name,
-        customer_phone: phone,
-        customer_address: form.fulfillment === "delivery" ? form.address.trim() : "Pickup in-store",
-        notes: form.notes.trim() || null,
-        items: orderItems,
-        subtotal,
-        total: subtotal,
-        source: "whatsapp",
+      const result = await placeOrderFn({
+        data: {
+          customer_name: name,
+          customer_phone: phone,
+          customer_address: form.fulfillment === "delivery" ? form.address.trim() : "Pickup in-store",
+          notes: form.notes.trim() || null,
+          fulfillment: form.fulfillment,
+          source: "whatsapp",
+          items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
+        },
       });
-      if (error) throw error;
 
-      const lines = items
-        .map((i) => `• ${i.name} x${i.quantity} — ${formatZAR(i.price * i.quantity)}`)
+      const lines = result.items
+        .map((i) => `• ${i.name} x${i.quantity} — ${formatZAR(i.line_total)}`)
         .join("\n");
       const msg =
         `Hi NEXA TRADE MART, I'd like to place an order:\n\n${lines}\n\n` +
-        `Subtotal: ${formatZAR(subtotal)}\n\n` +
+        `Subtotal: ${formatZAR(result.subtotal)}\n\n` +
         `Name: ${name}\nPhone: ${phone}\nOption: ${fulfillmentLabel}\n` +
         (form.fulfillment === "delivery" ? `Address: ${form.address.trim()}\n` : "") +
         (form.notes.trim() ? `Notes: ${form.notes.trim()}\n` : "");
