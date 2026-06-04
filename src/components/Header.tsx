@@ -77,14 +77,13 @@ export function Header() {
           )}
 
           {user ? (
-            <button
-              onClick={signOut}
-              className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 hover:border-gold hover:text-gold transition"
-              aria-label="Sign out"
+            <Link
+              to="/account"
+              className="hidden sm:inline-flex h-10 px-3 items-center gap-1.5 rounded-full border border-white/15 hover:border-gold hover:text-gold transition text-xs"
               title={user.email ?? "Account"}
             >
-              <LogOut className="h-4 w-4" />
-            </button>
+              <User className="h-4 w-4" /> Account
+            </Link>
           ) : (
             <Link
               to="/auth"
@@ -94,6 +93,7 @@ export function Header() {
               <LogIn className="h-4 w-4" />
             </Link>
           )}
+
 
           <CartDrawer />
           <button
@@ -131,12 +131,21 @@ export function Header() {
             )}
 
             {user ? (
-              <button
-                onClick={() => { setOpen(false); signOut(); }}
-                className="mt-2 inline-flex items-center justify-center gap-2 h-11 rounded-full border border-white/15 text-white/85 text-sm"
-              >
-                <LogOut className="h-4 w-4" /> Sign out ({user.email})
-              </button>
+              <>
+                <Link
+                  to="/account"
+                  onClick={() => setOpen(false)}
+                  className="mt-2 inline-flex items-center justify-center gap-2 h-11 rounded-full border border-gold/40 text-gold text-sm"
+                >
+                  <User className="h-4 w-4" /> My Account
+                </Link>
+                <button
+                  onClick={() => { setOpen(false); signOut(); }}
+                  className="mt-2 inline-flex items-center justify-center gap-2 h-11 rounded-full border border-white/15 text-white/85 text-sm"
+                >
+                  <LogOut className="h-4 w-4" /> Sign out
+                </button>
+              </>
             ) : (
               <Link
                 to="/auth"
@@ -146,6 +155,7 @@ export function Header() {
                 <User className="h-4 w-4" /> Sign in / Register
               </Link>
             )}
+
 
             <div className="pt-4 pb-2 text-[11px] uppercase tracking-widest text-white/40">Categories</div>
             {CATEGORIES.map((c) => (
