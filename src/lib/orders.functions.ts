@@ -20,6 +20,20 @@ export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((d) => inputSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+
+    let customerId: string | null = null;
+    try {
+      const auth = getRequestHeader("authorization");
+      const token = auth?.toLowerCase().startsWith("bearer ") ? auth.slice(7) : null;
+      if (token) {
+        const { data: userData } = await supabaseAdmin.auth.getUser(token);
+        if (userData?.user) customerId = userData.user.id;
+      }
+    } catch {
+      // guest checkout
+    }
+
 
     const ids = Array.from(new Set(data.items.map((i) => i.product_id)));
     const { data: products, error: prodErr } = await supabaseAdmin
@@ -57,6 +71,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         subtotal,
         total: subtotal,
         source: data.source,
+        customer_id: customerId,
       })
       .select("id")
       .single();
