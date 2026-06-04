@@ -3,7 +3,9 @@ import { X, Loader2, MessageCircle, Truck, Store } from "lucide-react";
 import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
 import { useServerFn } from "@tanstack/react-start";
 import { placeOrder } from "@/lib/orders.functions";
+import { useProfile } from "@/hooks/useProfile";
 import { toast } from "sonner";
+
 
 export interface OrderModalItem {
   product_id: string;
@@ -22,7 +24,9 @@ interface OrderModalProps {
 
 export function OrderModal({ open, onClose, items, onSuccess, title = "Complete your order" }: OrderModalProps) {
   const placeOrderFn = useServerFn(placeOrder);
+  const { profile, update: updateProfile } = useProfile();
   const [submitting, setSubmitting] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -30,6 +34,20 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
     address: "",
     notes: "",
   });
+
+  useEffect(() => {
+    if (open && profile && !prefilled) {
+      setForm((f) => ({
+        ...f,
+        name: f.name || profile.full_name || "",
+        phone: f.phone || profile.phone || "",
+        address: f.address || profile.address || "",
+      }));
+      setPrefilled(true);
+    }
+    if (!open) setPrefilled(false);
+  }, [open, profile, prefilled]);
+
 
   useEffect(() => {
     if (!open) return;
@@ -89,9 +107,18 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
         (form.notes.trim() ? `Notes: ${form.notes.trim()}\n` : "");
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
       toast.success("Order sent! We'll confirm on WhatsApp.");
+      // Save updated profile details for signed-in customers
+      if (profile) {
+        updateProfile({
+          full_name: name,
+          phone,
+          address: form.fulfillment === "delivery" ? form.address.trim() : profile.address ?? "",
+        });
+      }
       onSuccess?.();
       onClose();
       setForm({ name: "", phone: "", fulfillment: "delivery", address: "", notes: "" });
+
     } catch (e) {
       console.error(e);
       toast.error("Could not place order. Please try again.");

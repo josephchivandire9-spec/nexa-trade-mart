@@ -2,8 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, MessageCircle, Truck, ShieldCheck, Sparkles, Gift, Tag, Users, Star, Phone, Mail } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ProductCard } from "@/components/ProductCard";
+import { BannerCarousel } from "@/components/BannerCarousel";
 import { useProducts, useCategories } from "@/hooks/useProducts";
 import { WHATSAPP_NUMBER, SUPPORT_EMAIL, SUPPORT_PHONE } from "@/lib/shopify";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,8 +48,10 @@ function Home() {
 
   return (
     <div>
+      <BannerCarousel />
       {/* HERO */}
       <section className="relative overflow-hidden bg-ink-radial text-white">
+
         <div className="absolute inset-0 opacity-30 pointer-events-none"
           style={{ backgroundImage: "radial-gradient(circle at 20% 20%, rgba(212,175,55,0.25), transparent 45%), radial-gradient(circle at 80% 80%, rgba(212,175,55,0.15), transparent 50%)" }}
         />

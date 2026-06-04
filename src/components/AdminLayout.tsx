@@ -1,8 +1,9 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { LayoutDashboard, Package, ShoppingBag, MessageSquare, ImageIcon, FolderTree, LogOut, Loader2, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, MessageSquare, ImageIcon, FolderTree, LogOut, Loader2, ShieldAlert, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationBell } from "@/components/NotificationBell";
 import { toast } from "sonner";
 
 const NAV: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
@@ -10,9 +11,11 @@ const NAV: { to: string; label: string; icon: typeof LayoutDashboard; exact?: bo
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/categories", label: "Categories", icon: FolderTree },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { to: "/admin/customers", label: "Customers", icon: Users },
   { to: "/admin/messages", label: "Messages", icon: MessageSquare },
   { to: "/admin/banners", label: "Banners", icon: ImageIcon },
 ];
+
 
 export function AdminLayout() {
   const { user, isAdmin, loading } = useAuth();
@@ -84,8 +87,10 @@ export function AdminLayout() {
           </div>
         </aside>
         <main className="min-h-[60vh]">
+          <div className="flex justify-end mb-3"><NotificationBell /></div>
           <Outlet />
         </main>
+
       </div>
     </div>
   );
