@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { X, Loader2, MessageCircle, Truck, Store } from "lucide-react";
 import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { placeOrder } from "@/lib/orders.functions";
 import { toast } from "sonner";
 
 export interface OrderModalItem {
