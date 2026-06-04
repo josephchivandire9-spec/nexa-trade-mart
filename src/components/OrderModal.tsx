@@ -21,6 +21,7 @@ interface OrderModalProps {
 }
 
 export function OrderModal({ open, onClose, items, onSuccess, title = "Complete your order" }: OrderModalProps) {
+  const placeOrderFn = useServerFn(placeOrder);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "",
