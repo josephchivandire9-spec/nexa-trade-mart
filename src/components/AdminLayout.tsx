@@ -87,8 +87,10 @@ export function AdminLayout() {
           </div>
         </aside>
         <main className="min-h-[60vh]">
+          <div className="flex justify-end mb-3"><NotificationBell /></div>
           <Outlet />
         </main>
+
       </div>
     </div>
   );
