@@ -11,22 +11,32 @@ export const Route = createFileRoute("/admin/rewards")({
 
 interface Row {
   id: string; user_id: string; points: number; reason: string; status: string; created_at: string;
-  profile?: { full_name: string | null; email: string | null; customer_code: string | null } | null;
 }
+interface ProfileLite { id: string; full_name: string | null; email: string | null; customer_code: string | null }
 
 function AdminRewards() {
   const [rows, setRows] = useState<Row[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     let q = supabase.from("reward_points")
-      .select("id,user_id,points,reason,status,created_at,profile:profiles!reward_points_user_id_fkey(full_name,email,customer_code)")
+      .select("id,user_id,points,reason,status,created_at")
       .order("created_at", { ascending: false }).limit(200);
     if (filter !== "all") q = q.eq("status", filter);
     const { data } = await q;
-    setRows((data as unknown as Row[]) ?? []);
+    const list = (data as Row[]) ?? [];
+    setRows(list);
+    const ids = Array.from(new Set(list.map((r) => r.user_id)));
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles")
+        .select("id,full_name,email,customer_code").in("id", ids);
+      const map: Record<string, ProfileLite> = {};
+      (profs ?? []).forEach((p: ProfileLite) => { map[p.id] = p; });
+      setProfiles(map);
+    }
     setLoading(false);
   }, [filter]);
 
@@ -58,11 +68,13 @@ function AdminRewards() {
               <tr><th className="text-left p-3">Customer</th><th className="text-left p-3">Reason</th><th className="text-right p-3">Points</th><th className="text-left p-3">Status</th><th className="p-3"></th></tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {rows.map((r) => {
+                const p = profiles[r.user_id];
+                return (
                 <tr key={r.id} className="border-t">
                   <td className="p-3">
-                    <div className="font-medium">{r.profile?.full_name || r.profile?.email || "—"}</div>
-                    <div className="text-xs text-muted-foreground">{r.profile?.customer_code}</div>
+                    <div className="font-medium">{p?.full_name || p?.email || "—"}</div>
+                    <div className="text-xs text-muted-foreground">{p?.customer_code}</div>
                   </td>
                   <td className="p-3">{r.reason}</td>
                   <td className="p-3 text-right font-bold">+{r.points}</td>
