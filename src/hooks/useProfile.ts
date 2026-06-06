@@ -8,7 +8,12 @@ export interface Profile {
   full_name: string | null;
   phone: string | null;
   address: string | null;
+  customer_code: string | null;
+  referral_code: string | null;
+  referred_by: string | null;
 }
+
+const COLS = "id,email,full_name,phone,address,customer_code,referral_code,referred_by";
 
 export function useProfile() {
   const { user } = useAuth();
@@ -24,7 +29,7 @@ export function useProfile() {
     setLoading(true);
     supabase
       .from("profiles")
-      .select("id,email,full_name,phone,address")
+      .select(COLS)
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -42,7 +47,7 @@ export function useProfile() {
       .from("profiles")
       .update(patch)
       .eq("id", user.id)
-      .select("id,email,full_name,phone,address")
+      .select(COLS)
       .single();
     if (!error && data) setProfile(data as Profile);
     return { error };
