@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappOrdersRouteImport } from './routes/whatsapp-orders'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PromotionsRouteImport } from './routes/promotions'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CategoriesRouteImport } from './routes/categories'
@@ -23,13 +25,20 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
+import { Route as AdminRewardsRouteImport } from './routes/admin.rewards'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as AccountTrackingRouteImport } from './routes/account.tracking'
+import { Route as AccountSettingsRouteImport } from './routes/account.settings'
+import { Route as AccountRewardsRouteImport } from './routes/account.rewards'
+import { Route as AccountReferralsRouteImport } from './routes/account.referrals'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
+import { Route as AccountAddressesRouteImport } from './routes/account.addresses'
 import { Route as AdminCustomersIdRouteImport } from './routes/admin.customers.$id'
 
 const WhatsappOrdersRoute = WhatsappOrdersRouteImport.update({
@@ -47,9 +56,19 @@ const ShopRoute = ShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PromotionsRoute = PromotionsRouteImport.update({
   id: '/promotions',
   path: '/promotions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -102,6 +121,11 @@ const ProductHandleRoute = ProductHandleRouteImport.update({
   path: '/product/$handle',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRewardsRoute = AdminRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -115,6 +139,11 @@ const AdminOrdersRoute = AdminOrdersRouteImport.update({
 const AdminMessagesRoute = AdminMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
@@ -132,9 +161,34 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
   path: '/banners',
   getParentRoute: () => AdminRoute,
 } as any)
+const AccountTrackingRoute = AccountTrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountSettingsRoute = AccountSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountRewardsRoute = AccountRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountReferralsRoute = AccountReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
+  getParentRoute: () => AccountRoute,
+} as any)
 const AccountOrdersRoute = AccountOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountAddressesRoute = AccountAddressesRouteImport.update({
+  id: '/addresses',
+  path: '/addresses',
   getParentRoute: () => AccountRoute,
 } as any)
 const AdminCustomersIdRoute = AdminCustomersIdRouteImport.update({
@@ -152,17 +206,26 @@ export interface FileRoutesByFullPath {
   '/categories': typeof CategoriesRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/login': typeof LoginRoute
   '/promotions': typeof PromotionsRoute
+  '/register': typeof RegisterRoute
   '/shop': typeof ShopRoute
   '/support': typeof SupportRoute
   '/whatsapp-orders': typeof WhatsappOrdersRoute
+  '/account/addresses': typeof AccountAddressesRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/account/referrals': typeof AccountReferralsRoute
+  '/account/rewards': typeof AccountRewardsRoute
+  '/account/settings': typeof AccountSettingsRoute
+  '/account/tracking': typeof AccountTrackingRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/rewards': typeof AdminRewardsRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
@@ -175,17 +238,26 @@ export interface FileRoutesByTo {
   '/categories': typeof CategoriesRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/login': typeof LoginRoute
   '/promotions': typeof PromotionsRoute
+  '/register': typeof RegisterRoute
   '/shop': typeof ShopRoute
   '/support': typeof SupportRoute
   '/whatsapp-orders': typeof WhatsappOrdersRoute
+  '/account/addresses': typeof AccountAddressesRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/account/referrals': typeof AccountReferralsRoute
+  '/account/rewards': typeof AccountRewardsRoute
+  '/account/settings': typeof AccountSettingsRoute
+  '/account/tracking': typeof AccountTrackingRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/rewards': typeof AdminRewardsRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin': typeof AdminIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
@@ -200,17 +272,26 @@ export interface FileRoutesById {
   '/categories': typeof CategoriesRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/login': typeof LoginRoute
   '/promotions': typeof PromotionsRoute
+  '/register': typeof RegisterRoute
   '/shop': typeof ShopRoute
   '/support': typeof SupportRoute
   '/whatsapp-orders': typeof WhatsappOrdersRoute
+  '/account/addresses': typeof AccountAddressesRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/account/referrals': typeof AccountReferralsRoute
+  '/account/rewards': typeof AccountRewardsRoute
+  '/account/settings': typeof AccountSettingsRoute
+  '/account/tracking': typeof AccountTrackingRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/rewards': typeof AdminRewardsRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
@@ -226,17 +307,26 @@ export interface FileRouteTypes {
     | '/categories'
     | '/contact'
     | '/faq'
+    | '/login'
     | '/promotions'
+    | '/register'
     | '/shop'
     | '/support'
     | '/whatsapp-orders'
+    | '/account/addresses'
     | '/account/orders'
+    | '/account/referrals'
+    | '/account/rewards'
+    | '/account/settings'
+    | '/account/tracking'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/customers'
+    | '/admin/login'
     | '/admin/messages'
     | '/admin/orders'
     | '/admin/products'
+    | '/admin/rewards'
     | '/product/$handle'
     | '/admin/'
     | '/admin/customers/$id'
@@ -249,17 +339,26 @@ export interface FileRouteTypes {
     | '/categories'
     | '/contact'
     | '/faq'
+    | '/login'
     | '/promotions'
+    | '/register'
     | '/shop'
     | '/support'
     | '/whatsapp-orders'
+    | '/account/addresses'
     | '/account/orders'
+    | '/account/referrals'
+    | '/account/rewards'
+    | '/account/settings'
+    | '/account/tracking'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/customers'
+    | '/admin/login'
     | '/admin/messages'
     | '/admin/orders'
     | '/admin/products'
+    | '/admin/rewards'
     | '/product/$handle'
     | '/admin'
     | '/admin/customers/$id'
@@ -273,17 +372,26 @@ export interface FileRouteTypes {
     | '/categories'
     | '/contact'
     | '/faq'
+    | '/login'
     | '/promotions'
+    | '/register'
     | '/shop'
     | '/support'
     | '/whatsapp-orders'
+    | '/account/addresses'
     | '/account/orders'
+    | '/account/referrals'
+    | '/account/rewards'
+    | '/account/settings'
+    | '/account/tracking'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/customers'
+    | '/admin/login'
     | '/admin/messages'
     | '/admin/orders'
     | '/admin/products'
+    | '/admin/rewards'
     | '/product/$handle'
     | '/admin/'
     | '/admin/customers/$id'
@@ -298,7 +406,9 @@ export interface RootRouteChildren {
   CategoriesRoute: typeof CategoriesRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
+  LoginRoute: typeof LoginRoute
   PromotionsRoute: typeof PromotionsRoute
+  RegisterRoute: typeof RegisterRoute
   ShopRoute: typeof ShopRoute
   SupportRoute: typeof SupportRoute
   WhatsappOrdersRoute: typeof WhatsappOrdersRoute
@@ -328,11 +438,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/promotions': {
       id: '/promotions'
       path: '/promotions'
       fullPath: '/promotions'
       preLoaderRoute: typeof PromotionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -405,6 +529,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductHandleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/rewards': {
+      id: '/admin/rewards'
+      path: '/rewards'
+      fullPath: '/admin/rewards'
+      preLoaderRoute: typeof AdminRewardsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/products': {
       id: '/admin/products'
       path: '/products'
@@ -424,6 +555,13 @@ declare module '@tanstack/react-router' {
       path: '/messages'
       fullPath: '/admin/messages'
       preLoaderRoute: typeof AdminMessagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/customers': {
@@ -447,11 +585,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/account/tracking': {
+      id: '/account/tracking'
+      path: '/tracking'
+      fullPath: '/account/tracking'
+      preLoaderRoute: typeof AccountTrackingRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/settings': {
+      id: '/account/settings'
+      path: '/settings'
+      fullPath: '/account/settings'
+      preLoaderRoute: typeof AccountSettingsRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/rewards': {
+      id: '/account/rewards'
+      path: '/rewards'
+      fullPath: '/account/rewards'
+      preLoaderRoute: typeof AccountRewardsRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/referrals': {
+      id: '/account/referrals'
+      path: '/referrals'
+      fullPath: '/account/referrals'
+      preLoaderRoute: typeof AccountReferralsRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/account/orders': {
       id: '/account/orders'
       path: '/orders'
       fullPath: '/account/orders'
       preLoaderRoute: typeof AccountOrdersRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/addresses': {
+      id: '/account/addresses'
+      path: '/addresses'
+      fullPath: '/account/addresses'
+      preLoaderRoute: typeof AccountAddressesRouteImport
       parentRoute: typeof AccountRoute
     }
     '/admin/customers/$id': {
@@ -465,11 +638,21 @@ declare module '@tanstack/react-router' {
 }
 
 interface AccountRouteChildren {
+  AccountAddressesRoute: typeof AccountAddressesRoute
   AccountOrdersRoute: typeof AccountOrdersRoute
+  AccountReferralsRoute: typeof AccountReferralsRoute
+  AccountRewardsRoute: typeof AccountRewardsRoute
+  AccountSettingsRoute: typeof AccountSettingsRoute
+  AccountTrackingRoute: typeof AccountTrackingRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
+  AccountAddressesRoute: AccountAddressesRoute,
   AccountOrdersRoute: AccountOrdersRoute,
+  AccountReferralsRoute: AccountReferralsRoute,
+  AccountRewardsRoute: AccountRewardsRoute,
+  AccountSettingsRoute: AccountSettingsRoute,
+  AccountTrackingRoute: AccountTrackingRoute,
 }
 
 const AccountRouteWithChildren =
@@ -491,9 +674,11 @@ interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminProductsRoute: typeof AdminProductsRoute
+  AdminRewardsRoute: typeof AdminRewardsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -501,9 +686,11 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCustomersRoute: AdminCustomersRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
   AdminMessagesRoute: AdminMessagesRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminProductsRoute: AdminProductsRoute,
+  AdminRewardsRoute: AdminRewardsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -518,7 +705,9 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesRoute: CategoriesRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
+  LoginRoute: LoginRoute,
   PromotionsRoute: PromotionsRoute,
+  RegisterRoute: RegisterRoute,
   ShopRoute: ShopRoute,
   SupportRoute: SupportRoute,
   WhatsappOrdersRoute: WhatsappOrdersRoute,
@@ -527,13 +716,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

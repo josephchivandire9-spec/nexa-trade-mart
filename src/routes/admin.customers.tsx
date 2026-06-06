@@ -17,7 +17,7 @@ function AdminCustomers() {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id,email,full_name,phone,address,created_at")
+        .select("id,email,full_name,phone,address,customer_code,created_at")
         .order("created_at", { ascending: false });
       return data ?? [];
     },
@@ -46,6 +46,7 @@ function AdminCustomers() {
         p.email?.toLowerCase().includes(term) ||
         p.full_name?.toLowerCase().includes(term) ||
         p.phone?.toLowerCase().includes(term) ||
+        p.customer_code?.toLowerCase().includes(term) ||
         p.id.toLowerCase().includes(term)
     );
   }, [profiles, q]);
@@ -60,7 +61,7 @@ function AdminCustomers() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search by name, email, phone, ID…"
+          placeholder="Search by name, email, phone, customer ID…"
           className="w-full h-11 rounded-lg border bg-background pl-9 pr-3 text-sm outline-none focus:border-gold"
         />
       </div>
@@ -83,7 +84,10 @@ function AdminCustomers() {
                       <User className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium truncate">{p.full_name || "(no name)"}</div>
+                      <div className="font-medium truncate flex items-center gap-2">
+                        {p.full_name || "(no name)"}
+                        {p.customer_code && <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gold/15 text-gold-deep">{p.customer_code}</span>}
+                      </div>
                       <div className="text-xs text-muted-foreground truncate">
                         {p.email} {p.phone ? `· ${p.phone}` : ""}
                       </div>

@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { LayoutDashboard, Package, ShoppingBag, MessageSquare, ImageIcon, FolderTree, LogOut, Loader2, ShieldAlert, Users } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, MessageSquare, ImageIcon, FolderTree, LogOut, Loader2, ShieldAlert, Users, Gift } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -12,6 +12,7 @@ const NAV: { to: string; label: string; icon: typeof LayoutDashboard; exact?: bo
   { to: "/admin/categories", label: "Categories", icon: FolderTree },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/customers", label: "Customers", icon: Users },
+  { to: "/admin/rewards", label: "Rewards", icon: Gift },
   { to: "/admin/messages", label: "Messages", icon: MessageSquare },
   { to: "/admin/banners", label: "Banners", icon: ImageIcon },
 ];
@@ -23,13 +24,13 @@ export function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
+    if (!loading && !user) navigate({ to: "/admin/login" });
   }, [user, loading, navigate]);
 
   async function signOut() {
     await supabase.auth.signOut();
     toast.success("Signed out");
-    navigate({ to: "/auth" });
+    navigate({ to: "/admin/login" });
   }
 
   if (loading) {
