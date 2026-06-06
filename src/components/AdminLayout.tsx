@@ -24,13 +24,13 @@ export function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
+    if (!loading && !user) navigate({ to: "/admin/login" });
   }, [user, loading, navigate]);
 
   async function signOut() {
     await supabase.auth.signOut();
     toast.success("Signed out");
-    navigate({ to: "/auth" });
+    navigate({ to: "/admin/login" });
   }
 
   if (loading) {

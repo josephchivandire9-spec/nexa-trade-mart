@@ -167,7 +167,7 @@ function Home() {
             <div className="mt-10 rounded-2xl border border-dashed bg-secondary/40 p-10 text-center">
               <p className="text-muted-foreground">No products yet.</p>
               <p className="text-sm mt-1">Sign in and add your first products from the admin dashboard.</p>
-              <Link to="/auth" className="mt-4 inline-flex h-10 px-5 rounded-full bg-ink text-white text-sm">Go to admin</Link>
+              <Link to="/admin/login" className="mt-4 inline-flex h-10 px-5 rounded-full bg-ink text-white text-sm">Go to admin</Link>
             </div>
           ) : (
             <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">

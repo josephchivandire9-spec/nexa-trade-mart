@@ -86,11 +86,11 @@ export function Header() {
             </Link>
           ) : (
             <Link
-              to="/auth"
-              className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 hover:border-gold hover:text-gold transition"
+              to="/login"
+              className="hidden sm:inline-flex h-10 px-3 items-center gap-1.5 rounded-full border border-white/15 hover:border-gold hover:text-gold transition text-xs"
               aria-label="Sign in"
             >
-              <LogIn className="h-4 w-4" />
+              <LogIn className="h-4 w-4" /> Sign in
             </Link>
           )}
 
@@ -147,13 +147,22 @@ export function Header() {
                 </button>
               </>
             ) : (
-              <Link
-                to="/auth"
-                onClick={() => setOpen(false)}
-                className="mt-3 inline-flex items-center justify-center gap-2 h-11 rounded-full border border-gold/40 text-gold text-sm"
-              >
-                <User className="h-4 w-4" /> Sign in / Register
-              </Link>
+              <>
+                <Link
+                  to="/login"
+                  onClick={() => setOpen(false)}
+                  className="mt-3 inline-flex items-center justify-center gap-2 h-11 rounded-full border border-gold/40 text-gold text-sm"
+                >
+                  <User className="h-4 w-4" /> Sign in
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setOpen(false)}
+                  className="mt-2 inline-flex items-center justify-center gap-2 h-11 rounded-full gradient-gold text-ink font-bold text-sm"
+                >
+                  Create account
+                </Link>
+              </>
             )}
 
 
