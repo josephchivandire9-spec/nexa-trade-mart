@@ -1,49 +1,95 @@
-## Phase 1 — non-destructive upgrade
 
-Keeps current guest WhatsApp checkout, existing admin tools, AI assistant, and styling intact. Adds optional customer accounts, CRM, order lifecycle, fixes banners, and adds admin notifications. Phase 2 (analytics, web push, payments, loyalty) is scoped separately later.
+# Two-System Auth + Rewards Upgrade
 
-### 1. Fix banners on the homepage (root cause)
-The `banners` table has 4 active rows and a `Public view active banners` RLS policy that allows anon SELECT. The homepage never queries it — it renders a hardcoded hero only. Fix:
-- Add `useBanners()` hook (TanStack Query, public read via anon client) ordered by `sort_order`, `is_active = true`.
-- New `<BannerCarousel />` component: auto-rotating hero slides (image + title + subtitle + CTA), keyboard/swipe nav, falls back gracefully to current static hero when there are zero banners (preserves design).
-- Mount above the current hero on `/`; current hero stays as secondary section so no visual regression if banners empty.
-- Wire Supabase Realtime on `banners` so changes appear without refresh.
-- Verify after deploy that the 4 existing banners render.
+Non-destructive extension of the current platform. No existing products, orders, banners, AI assistant, or design tokens are removed. Today's `/auth` page already supports email+password signup; the database trigger `handle_new_user` already assigns `customer` role by default and `admin` only to the first user. We extend this rather than replace it.
 
-### 2. Customer accounts (optional)
-- Reuse existing `auth.tsx` page; add `/account` route group: `/account` (profile), `/account/orders` (history).
-- Header: when signed in as non-admin → show Account menu (Profile, Orders, Sign out). Admin link only when `isAdmin`. Guests see Sign in link.
-- Extend `profiles` table with `phone`, `address` (migration). Auto-create row already handled by `handle_new_user` trigger.
-- `OrderModal`: when signed in, prefill name/phone/address from profile; on submit, also persist updates back to profile. Guests continue unchanged.
-- `placeOrder` server fn: accept optional `customer_id` from auth context; link order to the profile when present.
+## 1. Two separate auth surfaces
 
-### 3. Order lifecycle + CRM
-- Migration: add `status` enum (`pending|processing|shipped|delivered|cancelled`) and `payment_status` column to `orders` if missing; add `customer_id uuid references auth.users` (nullable).
-- `/account/orders` page: customer sees own orders (RLS: `customer_id = auth.uid()`).
-- Admin Orders page: add status dropdown (inline update), filter by status, search by name/phone/order ID.
-- New admin page `/admin/customers`: list profiles + order count + lifetime spend; click → detail view with profile, full order history, AI conversation count.
+| | Customer | Admin |
+|---|---|---|
+| Route | `/login`, `/register` (rename of `/auth`) | `/admin/login` (hidden, noindex) |
+| Default after sign-in | `/account` | `/admin` |
+| Role required | `customer` | `admin` |
+| Header link | "Account" / "Sign in" (existing) | Hidden — admin link only shows when `isAdmin` |
 
-### 4. Admin notifications (in-dashboard + WhatsApp link)
-- New `notifications` table (`id, type, title, body, link, is_read, created_at`); RLS admin-only.
-- Triggers (DB) insert a notification row on:
-  - new `orders` row
-  - new `contact_messages` row
-  - new `profiles` row (registration)
-- AdminLayout: bell icon with unread count (Realtime subscription); dropdown lists recent items, click marks read & navigates.
-- For each new order notification, also surface a one-click "Notify on WhatsApp" link (pre-filled `wa.me` message with order summary) — admin clicks to send themselves/customer. No background sending this round.
+Both use Supabase Auth under the hood (one identity table), but the UI, redirect targets, and access gates are separate. A logged-in customer hitting `/admin/login` or `/admin/*` gets the existing "Not authorized" screen — unchanged.
 
-### 5. AI escalation polish
-- Existing escalation already writes to `contact_messages`. Add `priority: 'support_required'` flag and ensure it triggers the admin notification above. No other behavior changes.
+### Customer ID
+Add `customer_code` to `profiles` (format `NXA-XXXXXX`, generated in `handle_new_user` trigger). Backfill existing customers. Surfaced in account header + admin customer detail page.
 
-### 6. Safety
-- Every change additive. No deletions of existing routes/components/policies.
-- All new RLS uses `has_role` pattern. New tables include GRANTs.
-- All server-side order mutations stay in `orders.functions.ts` with price re-validation.
+## 2. Customer dashboard (`/account/*`)
 
-### Out of scope this round
-Web push, email alerts, payment gateways, loyalty engine, delivery tracking, analytics dashboard, mobile app. Tee'd up for Phase 2.
+Existing `/account` (Profile) and `/account/orders` stay. Add:
+- `/account/addresses` — multiple saved addresses (new `customer_addresses` table; default address auto-fills OrderModal)
+- `/account/tracking` — order tracking by status timeline (uses existing `orders.status`)
+- `/account/rewards` — points balance + history
+- `/account/referrals` — share link + referred users + earned points
+- `/account/settings` — change password, email preferences
 
-### Technical file map
-- New: `src/hooks/useBanners.ts`, `src/components/BannerCarousel.tsx`, `src/components/NotificationBell.tsx`, `src/routes/account.tsx`, `src/routes/account.orders.tsx`, `src/routes/admin.customers.tsx`, `src/routes/admin.customers.$id.tsx`.
-- Edited: `src/routes/index.tsx` (mount carousel), `src/components/Header.tsx` (account menu), `src/components/OrderModal.tsx` (prefill + link to profile), `src/lib/orders.functions.ts` (link customer_id), `src/components/AdminLayout.tsx` (bell), `src/routes/admin.orders.tsx` (status + filter + search).
-- Migrations: profile columns, orders.status/customer_id, notifications table + triggers + RLS + GRANTs.
+Sidebar in `src/routes/account.tsx` gets new nav entries.
+
+## 3. Rewards + referrals
+
+New tables:
+- `reward_points` — running ledger: `customer_id`, `points`, `reason`, `order_id?`, `status (pending|approved|rejected)`, `created_at`
+- `referrals` — `referrer_id`, `referred_id`, `code`, `status`, `reward_points`, `created_at`
+- `profiles.referral_code` (unique, auto-generated)
+- `profiles.referred_by` (nullable, references profiles)
+
+Rules (admin-approved):
+- Signup via referral link: 100 pts to referrer (pending until referred user's first order is delivered → approved)
+- Each completed order: 1 pt per R10 spent (pending → approved when status='delivered')
+- Admin can approve/reject any entry from `/admin/rewards`
+
+Registration page reads `?ref=CODE` from URL, stores in `referred_by`.
+
+## 4. Admin additions
+
+- `/admin/rewards` — pending points queue, approve/reject
+- `/admin/customers` already exists — extend with search by name / phone / email / customer_code, show points balance, referral stats
+- Admin sidebar gets "Rewards" entry
+
+## 5. Safety
+
+- All new tables: RLS enabled, GRANTs, customer-only-sees-own + admin-sees-all policies via existing `has_role()`.
+- No edits to: existing orders flow, OrderModal pricing, banners, AI assistant, products, Shopify integration.
+- `/auth` route kept as redirect to `/login` for backwards compatibility.
+
+## Technical file map
+
+**Migrations (one SQL file):**
+- `profiles`: add `customer_code`, `referral_code`, `referred_by`, `points_balance` (computed via trigger from `reward_points`)
+- new table `customer_addresses`
+- new table `reward_points`
+- new table `referrals`
+- update `handle_new_user` to generate `customer_code` + `referral_code` and apply `referred_by` from raw_user_meta_data
+- triggers: award points on order status → delivered; award referrer on referred user's first delivered order
+- RLS + GRANTs on all new tables
+
+**New routes:**
+- `src/routes/login.tsx` (customer)
+- `src/routes/register.tsx` (customer, supports `?ref=`)
+- `src/routes/admin.login.tsx` (admin-only, noindex)
+- `src/routes/account.addresses.tsx`
+- `src/routes/account.tracking.tsx`
+- `src/routes/account.rewards.tsx`
+- `src/routes/account.referrals.tsx`
+- `src/routes/account.settings.tsx`
+- `src/routes/admin.rewards.tsx`
+
+**Edited:**
+- `src/routes/auth.tsx` → thin redirect to `/login`
+- `src/routes/account.tsx` → expanded sidebar, show customer_code
+- `src/components/AdminLayout.tsx` → add "Rewards" nav
+- `src/routes/admin.customers.tsx` → multi-field search, points column
+- `src/components/Header.tsx` → "Sign in" → `/login`, "Register" → `/register`
+- `src/components/OrderModal.tsx` → pull default address from `customer_addresses`
+- `src/hooks/useAuth.ts` → expose `isCustomer` helper
+
+**New hooks:**
+- `src/hooks/useAddresses.ts`
+- `src/hooks/useRewards.ts`
+- `src/hooks/useReferrals.ts`
+
+## Out of scope (Phase 2)
+Discount code redemption at checkout, point-to-discount conversion, email notifications for reward approvals, mobile push, advanced analytics. These are tee'd up by the data model but not built this round.
