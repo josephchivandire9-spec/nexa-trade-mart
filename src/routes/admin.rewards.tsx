@@ -88,7 +88,8 @@ function AdminRewards() {
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {rows.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-sm text-muted-foreground">No entries</td></tr>}
             </tbody>
           </table>
