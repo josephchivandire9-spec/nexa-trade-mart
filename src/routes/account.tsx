@@ -16,7 +16,7 @@ export const Route = createFileRoute("/account")({
   component: AccountLayout,
 });
 
-const NAV = [
+const NAV: { to: string; label: string; icon: typeof User; exact?: boolean }[] = [
   { to: "/account", label: "Profile", icon: User, exact: true },
   { to: "/account/orders", label: "My Orders", icon: Package },
   { to: "/account/tracking", label: "Order Tracking", icon: Truck },
@@ -24,7 +24,7 @@ const NAV = [
   { to: "/account/rewards", label: "Rewards Center", icon: Gift },
   { to: "/account/referrals", label: "Referral Program", icon: Users },
   { to: "/account/settings", label: "Settings", icon: SettingsIcon },
-] as const;
+];
 
 function AccountLayout() {
   const { user, loading } = useAuth();
