@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Upload, X, Loader2, Star } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, Loader2, Star, GripVertical } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatZAR } from "@/lib/shopify";
 import { toast } from "sonner";
@@ -9,6 +9,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/admin/products")({
   component: AdminProducts,
 });
+
+const MAX_IMAGES = 5;
 
 interface ProductForm {
   id?: string;
@@ -18,7 +20,7 @@ interface ProductForm {
   price: number;
   compare_at_price: number | null;
   discount_pct: number;
-  image_url: string | null;
+  images: string[]; // unified gallery: first = main
   category_id: string | null;
   stock: number;
   sku: string;
@@ -28,7 +30,7 @@ interface ProductForm {
 
 const empty: ProductForm = {
   name: "", slug: "", description: "", price: 0, compare_at_price: null,
-  discount_pct: 0, image_url: null, category_id: null, stock: 0, sku: "",
+  discount_pct: 0, images: [], category_id: null, stock: 0, sku: "",
   is_active: true, is_featured: false,
 };
 
@@ -74,7 +76,7 @@ function AdminProducts() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl">Products</h1>
-          <p className="text-sm text-muted-foreground mt-1">{products.length} total</p>
+          <p className="text-sm text-muted-foreground mt-1">{products.length} total · up to {MAX_IMAGES} images each</p>
         </div>
         <button
           onClick={() => setEditing({ ...empty })}
@@ -103,48 +105,58 @@ function AdminProducts() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {products.map((p: any) => (
-                <tr key={p.id}>
-                  <td className="p-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-lg bg-muted overflow-hidden shrink-0">
-                        {p.image_url && <img src={p.image_url} alt="" className="w-full h-full object-cover" />}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-medium truncate flex items-center gap-1">
-                          {p.name}
-                          {p.is_featured && <Star className="h-3 w-3 fill-gold text-gold" />}
+              {products.map((p: any) => {
+                const imgs: string[] = [p.image_url, ...(p.gallery ?? [])].filter(Boolean);
+                return (
+                  <tr key={p.id}>
+                    <td className="p-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-lg bg-muted overflow-hidden shrink-0 relative">
+                          {imgs[0] && <img src={imgs[0]} alt="" className="w-full h-full object-cover" />}
+                          {imgs.length > 1 && (
+                            <span className="absolute bottom-0 right-0 text-[9px] px-1 bg-black/70 text-white rounded-tl">
+                              +{imgs.length - 1}
+                            </span>
+                          )}
                         </div>
-                        <div className="text-xs text-muted-foreground truncate">{p.slug}</div>
+                        <div className="min-w-0">
+                          <div className="font-medium truncate flex items-center gap-1">
+                            {p.name}
+                            {p.is_featured && <Star className="h-3 w-3 fill-gold text-gold" />}
+                          </div>
+                          <div className="text-xs text-muted-foreground truncate">{p.slug}</div>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="p-3 hidden md:table-cell text-muted-foreground">{p.category?.name ?? "—"}</td>
-                  <td className="p-3 font-semibold">{formatZAR(p.price)}</td>
-                  <td className="p-3 hidden sm:table-cell">{p.stock}</td>
-                  <td className="p-3 hidden md:table-cell">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${p.is_active ? "bg-emerald-500/15 text-emerald-700" : "bg-muted text-muted-foreground"}`}>
-                      {p.is_active ? "Active" : "Hidden"}
-                    </span>
-                  </td>
-                  <td className="p-3 text-right">
-                    <button
-                      onClick={() => setEditing({
-                        id: p.id, name: p.name, slug: p.slug, description: p.description ?? "",
-                        price: Number(p.price), compare_at_price: p.compare_at_price ? Number(p.compare_at_price) : null,
-                        discount_pct: p.discount_pct ?? 0, image_url: p.image_url, category_id: p.category_id,
-                        stock: p.stock, sku: p.sku ?? "", is_active: p.is_active, is_featured: p.is_featured,
-                      })}
-                      className="h-8 w-8 inline-flex items-center justify-center rounded hover:bg-muted"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => remove(p.id)} className="h-8 w-8 inline-flex items-center justify-center rounded text-destructive hover:bg-destructive/10">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="p-3 hidden md:table-cell text-muted-foreground">{p.category?.name ?? "—"}</td>
+                    <td className="p-3 font-semibold">{formatZAR(p.price)}</td>
+                    <td className="p-3 hidden sm:table-cell">{p.stock}</td>
+                    <td className="p-3 hidden md:table-cell">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${p.is_active ? "bg-emerald-500/15 text-emerald-700" : "bg-muted text-muted-foreground"}`}>
+                        {p.is_active ? "Active" : "Hidden"}
+                      </span>
+                    </td>
+                    <td className="p-3 text-right">
+                      <button
+                        onClick={() => setEditing({
+                          id: p.id, name: p.name, slug: p.slug, description: p.description ?? "",
+                          price: Number(p.price), compare_at_price: p.compare_at_price ? Number(p.compare_at_price) : null,
+                          discount_pct: p.discount_pct ?? 0,
+                          images: imgs.slice(0, MAX_IMAGES),
+                          category_id: p.category_id,
+                          stock: p.stock, sku: p.sku ?? "", is_active: p.is_active, is_featured: p.is_featured,
+                        })}
+                        className="h-8 w-8 inline-flex items-center justify-center rounded hover:bg-muted"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => remove(p.id)} className="h-8 w-8 inline-flex items-center justify-center rounded text-destructive hover:bg-destructive/10">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
@@ -173,22 +185,57 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  async function upload(file: File) {
+  async function uploadFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const available = MAX_IMAGES - form.images.length;
+    if (available <= 0) {
+      toast.error(`Maximum ${MAX_IMAGES} images per product`);
+      return;
+    }
+    const list = Array.from(files).slice(0, available);
+    if (files.length > available) {
+      toast.message(`Only ${available} image(s) added — limit is ${MAX_IMAGES}.`);
+    }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
-      const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await supabase.storage.from("store-media").upload(path, file, { upsert: false });
-      if (error) throw error;
-      const { data } = supabase.storage.from("store-media").getPublicUrl(path);
-      setForm((f) => ({ ...f, image_url: data.publicUrl }));
-      toast.success("Image uploaded");
+      const urls: string[] = [];
+      for (const file of list) {
+        const ext = file.name.split(".").pop();
+        const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await supabase.storage.from("store-media").upload(path, file, { upsert: false });
+        if (error) throw error;
+        const { data } = supabase.storage.from("store-media").getPublicUrl(path);
+        urls.push(data.publicUrl);
+      }
+      setForm((f) => ({ ...f, images: [...f.images, ...urls].slice(0, MAX_IMAGES) }));
+      toast.success(`${urls.length} image(s) uploaded`);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Upload failed";
-      toast.error(msg);
+      toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally {
       setUploading(false);
     }
+  }
+
+  function removeImage(i: number) {
+    setForm((f) => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }));
+  }
+  function moveImage(i: number, dir: -1 | 1) {
+    setForm((f) => {
+      const next = [...f.images];
+      const j = i + dir;
+      if (j < 0 || j >= next.length) return f;
+      [next[i], next[j]] = [next[j], next[i]];
+      return { ...f, images: next };
+    });
+  }
+  function makeMain(i: number) {
+    if (i === 0) return;
+    setForm((f) => {
+      const next = [...f.images];
+      const [picked] = next.splice(i, 1);
+      next.unshift(picked);
+      return { ...f, images: next };
+    });
   }
 
   async function save() {
@@ -198,6 +245,7 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
     setSaving(true);
     try {
       const slug = form.slug.trim() || slugify(form.name);
+      const [main, ...rest] = form.images;
       const payload = {
         name: form.name.trim(),
         slug,
@@ -205,7 +253,8 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
         price: form.price,
         compare_at_price: form.compare_at_price,
         discount_pct: form.discount_pct,
-        image_url: form.image_url,
+        image_url: main ?? null,
+        gallery: rest,
         category_id: form.category_id,
         stock: form.stock,
         sku: form.sku || null,
@@ -219,8 +268,7 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
       toast.success(form.id ? "Product updated" : "Product created");
       onSaved();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Save failed";
-      toast.error(msg);
+      toast.error(e instanceof Error ? e.message : "Save failed");
     } finally {
       setSaving(false);
     }
@@ -244,16 +292,48 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
           <Field label="Description">
             <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} className={input} />
           </Field>
-          <Field label="Image">
-            {form.image_url && (
-              <img src={form.image_url} alt="" className="h-32 w-32 object-cover rounded-lg border mb-2" />
+
+          <Field label={`Images (${form.images.length}/${MAX_IMAGES})`}>
+            <p className="text-[11px] text-muted-foreground mb-2">First image is the main thumbnail. The rest form the gallery slider.</p>
+            {form.images.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
+                {form.images.map((url, i) => (
+                  <div key={url + i} className={`relative aspect-square rounded-lg overflow-hidden border ${i === 0 ? "border-gold ring-2 ring-gold/30" : "border-border"}`}>
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                    {i === 0 && (
+                      <span className="absolute top-1 left-1 text-[9px] px-1.5 py-0.5 rounded bg-gold text-ink font-bold uppercase tracking-wider">Main</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/70 text-white inline-flex items-center justify-center hover:bg-destructive"
+                      aria-label="Remove image"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                    <div className="absolute bottom-0 inset-x-0 flex items-stretch text-[10px] bg-black/70 text-white">
+                      <button type="button" onClick={() => moveImage(i, -1)} disabled={i === 0} className="flex-1 py-1 disabled:opacity-40 hover:bg-white/10">◀</button>
+                      {i !== 0 && (
+                        <button type="button" onClick={() => makeMain(i)} className="flex-1 py-1 border-x border-white/20 hover:bg-white/10">Main</button>
+                      )}
+                      <button type="button" onClick={() => moveImage(i, 1)} disabled={i === form.images.length - 1} className="flex-1 py-1 disabled:opacity-40 hover:bg-white/10">▶</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-            <label className="inline-flex items-center gap-2 h-10 px-3 rounded-lg border cursor-pointer hover:bg-muted text-sm">
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              {form.image_url ? "Replace image" : "Upload image"}
-              <input type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
-            </label>
+            {form.images.length < MAX_IMAGES && (
+              <label className="inline-flex items-center gap-2 h-10 px-3 rounded-lg border cursor-pointer hover:bg-muted text-sm">
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                Upload image(s) — up to {MAX_IMAGES - form.images.length} more
+                <input
+                  type="file" accept="image/*" hidden multiple
+                  onChange={(e) => { uploadFiles(e.target.files); e.target.value = ""; }}
+                />
+              </label>
+            )}
           </Field>
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="Price (R) *">
               <input type="number" min={0} step={0.01} value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} className={input} />
