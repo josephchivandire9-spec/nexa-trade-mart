@@ -14,6 +14,7 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
 import { AIAssistant } from "@/components/AIAssistant";
 import { useCartSync } from "@/hooks/useCartSync";
+import { WelcomeModal } from "@/components/WelcomeModal";
 
 function NotFoundComponent() {
   return (
@@ -117,6 +118,7 @@ function AppShell() {
       <Footer />
       <WhatsAppFab />
       <AIAssistant />
+      <WelcomeModal />
       <Toaster richColors position="top-center" />
     </>
   );

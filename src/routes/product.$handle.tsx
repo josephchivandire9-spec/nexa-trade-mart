@@ -6,6 +6,7 @@ import { formatZAR } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { OrderModal } from "@/components/OrderModal";
+import { ProductGallery } from "@/components/ProductGallery";
 
 export const Route = createFileRoute("/product/$handle")({
   head: ({ params }) => ({
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/product/$handle")({
 function ProductPage() {
   const { handle } = Route.useParams();
   const { data: product, isLoading } = useProductBySlug(handle);
-  const [imgIdx, setImgIdx] = useState(0);
+  
   const [qty, setQty] = useState(1);
   const [orderOpen, setOrderOpen] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
@@ -42,7 +43,6 @@ function ProductPage() {
   }
 
   const gallery = [product.image_url, ...(product.gallery ?? [])].filter(Boolean) as string[];
-  const currentImg = gallery[imgIdx] ?? product.image_url;
   const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
   const discountPct = product.discount_pct
     ? product.discount_pct
@@ -71,33 +71,15 @@ function ProductPage() {
       </Link>
 
       <div className="mt-6 grid lg:grid-cols-2 gap-10">
-        <div>
-          <div className="relative rounded-3xl overflow-hidden bg-secondary aspect-square border">
-            {currentImg ? (
-              <img src={currentImg} alt={product.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">No image</div>
-            )}
-            {discountPct > 0 && (
-              <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-destructive text-destructive-foreground font-bold text-sm">
-                -{discountPct}% OFF
-              </span>
-            )}
-          </div>
-          {gallery.length > 1 && (
-            <div className="mt-3 grid grid-cols-5 gap-2">
-              {gallery.map((url, i) => (
-                <button
-                  key={i}
-                  onClick={() => setImgIdx(i)}
-                  className={`aspect-square rounded-lg overflow-hidden border ${i === imgIdx ? "border-gold ring-2 ring-gold/40" : "border-border"}`}
-                >
-                  <img src={url} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductGallery
+          images={gallery}
+          alt={product.name}
+          badge={discountPct > 0 ? (
+            <span className="absolute top-4 left-4 z-10 px-3 py-1 rounded-full bg-destructive text-destructive-foreground font-bold text-sm">
+              -{discountPct}% OFF
+            </span>
+          ) : null}
+        />
 
         <div>
           {product.category?.name && (

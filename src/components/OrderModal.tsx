@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { X, Loader2, MessageCircle, Truck, Store } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { X, Loader2, MessageCircle, Truck, Store, LogIn, UserPlus } from "lucide-react";
 import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
 import { useServerFn } from "@tanstack/react-start";
 import { placeOrder } from "@/lib/orders.functions";
 import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 
@@ -24,6 +26,7 @@ interface OrderModalProps {
 
 export function OrderModal({ open, onClose, items, onSuccess, title = "Complete your order" }: OrderModalProps) {
   const placeOrderFn = useServerFn(placeOrder);
+  const { user, loading: authLoading } = useAuth();
   const { profile, update: updateProfile } = useProfile();
   const [submitting, setSubmitting] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
@@ -58,6 +61,38 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
   }, [open]);
 
   if (!open) return null;
+
+  // Gate guest checkout — require sign-in/registration first
+  if (!authLoading && !user) {
+    return (
+      <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center">
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+        <div className="relative w-full sm:max-w-md bg-background text-foreground sm:rounded-2xl rounded-t-3xl shadow-2xl border border-border">
+          <header className="flex items-start justify-between p-5 border-b border-border">
+            <div>
+              <h3 className="font-display text-xl">Sign in to check out</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">An account saves your details and lets you track orders.</p>
+            </div>
+            <button onClick={onClose} aria-label="Close" className="p-2 rounded-full hover:bg-muted">
+              <X className="h-5 w-5" />
+            </button>
+          </header>
+          <div className="p-5 space-y-3">
+            <Link to="/login" onClick={onClose} className="w-full h-12 rounded-lg gradient-gold text-ink font-bold inline-flex items-center justify-center gap-2">
+              <LogIn className="h-4 w-4" /> Sign in
+            </Link>
+            <Link to="/register" onClick={onClose} className="w-full h-12 rounded-lg border border-gold/40 text-gold-deep font-semibold inline-flex items-center justify-center gap-2 hover:bg-gold/5">
+              <UserPlus className="h-4 w-4" /> Create account
+            </Link>
+            <p className="text-[11px] text-center text-muted-foreground pt-2">
+              Your cart is saved — you'll come right back here after signing in.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
 
