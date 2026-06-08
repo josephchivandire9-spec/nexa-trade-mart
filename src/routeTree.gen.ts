@@ -26,6 +26,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminRewardsRouteImport } from './routes/admin.rewards'
 import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
 import { Route as AdminPromotionsRouteImport } from './routes/admin.promotions'
@@ -129,6 +130,11 @@ const ProductHandleRoute = ProductHandleRouteImport.update({
 const AdminSupportRoute = AdminSupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminRewardsRoute = AdminRewardsRouteImport.update({
@@ -260,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin/': typeof AdminIndexRoute
@@ -297,6 +304,7 @@ export interface FileRoutesByTo {
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin': typeof AdminIndexRoute
@@ -336,6 +344,7 @@ export interface FileRoutesById {
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin/': typeof AdminIndexRoute
@@ -376,6 +385,7 @@ export interface FileRouteTypes {
     | '/admin/promotions'
     | '/admin/referrals'
     | '/admin/rewards'
+    | '/admin/settings'
     | '/admin/support'
     | '/product/$handle'
     | '/admin/'
@@ -413,6 +423,7 @@ export interface FileRouteTypes {
     | '/admin/promotions'
     | '/admin/referrals'
     | '/admin/rewards'
+    | '/admin/settings'
     | '/admin/support'
     | '/product/$handle'
     | '/admin'
@@ -451,6 +462,7 @@ export interface FileRouteTypes {
     | '/admin/promotions'
     | '/admin/referrals'
     | '/admin/rewards'
+    | '/admin/settings'
     | '/admin/support'
     | '/product/$handle'
     | '/admin/'
@@ -594,6 +606,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/admin/support'
       preLoaderRoute: typeof AdminSupportRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/rewards': {
@@ -778,6 +797,7 @@ interface AdminRouteChildren {
   AdminPromotionsRoute: typeof AdminPromotionsRoute
   AdminReferralsRoute: typeof AdminReferralsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -795,6 +815,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPromotionsRoute: AdminPromotionsRoute,
   AdminReferralsRoute: AdminReferralsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
