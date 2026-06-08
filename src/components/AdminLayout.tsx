@@ -107,7 +107,10 @@ export function AdminLayout() {
     );
   }
 
-  const isActive = (n: NavItem) => (n.exact ? pathname === n.to : pathname.startsWith(n.to) && n.to !== "/admin") || (n.exact && pathname === n.to);
+  const isActive = (n: NavItem): boolean => {
+    if (n.exact) return pathname === n.to;
+    return pathname.startsWith(n.to) && n.to !== "/admin";
+  };
 
   return (
     <div className="fixed inset-0 flex flex-col bg-secondary/40 z-40 overflow-hidden">
