@@ -33,6 +33,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AccountTrackingRouteImport } from './routes/account.tracking'
 import { Route as AccountSettingsRouteImport } from './routes/account.settings'
 import { Route as AccountRewardsRouteImport } from './routes/account.rewards'
@@ -161,6 +162,11 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
   path: '/banners',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AccountTrackingRoute = AccountTrackingRouteImport.update({
   id: '/tracking',
   path: '/tracking',
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
@@ -250,6 +257,7 @@ export interface FileRoutesByTo {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
@@ -284,6 +292,7 @@ export interface FileRoutesById {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/customers'
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/customers'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/customers'
@@ -585,6 +597,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/account/tracking': {
       id: '/account/tracking'
       path: '/tracking'
@@ -671,6 +690,7 @@ const AdminCustomersRouteWithChildren = AdminCustomersRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminBannersRoute: typeof AdminBannersRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
@@ -683,6 +703,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminBannersRoute: AdminBannersRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCustomersRoute: AdminCustomersRouteWithChildren,

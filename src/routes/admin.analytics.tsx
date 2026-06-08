@@ -61,7 +61,7 @@ function AdminAnalytics() {
       const key = it.name || it.product_id || "Unknown";
       if (!productSales[key]) productSales[key] = { name: key, qty: 0, revenue: 0 };
       productSales[key].qty += Number(it.quantity || 0);
-      productSales[key].revenue += Number(it.line_total ?? it.price * it.quantity ?? 0);
+      productSales[key].revenue += Number(it.line_total ?? (Number(it.price) * Number(it.quantity)) ?? 0);
     });
   });
   const topProducts = Object.values(productSales).sort((a, b) => b.revenue - a.revenue).slice(0, 6);
