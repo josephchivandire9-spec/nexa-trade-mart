@@ -36,6 +36,7 @@ import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminAiRouteImport } from './routes/admin.ai'
 import { Route as AccountTrackingRouteImport } from './routes/account.tracking'
 import { Route as AccountSettingsRouteImport } from './routes/account.settings'
 import { Route as AccountRewardsRouteImport } from './routes/account.rewards'
@@ -179,6 +180,11 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAiRoute = AdminAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AccountTrackingRoute = AccountTrackingRouteImport.update({
   id: '/tracking',
   path: '/tracking',
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -271,6 +278,7 @@ export interface FileRoutesByTo {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -308,6 +316,7 @@ export interface FileRoutesById {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -346,6 +355,7 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/admin/ai'
     | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/admin/ai'
     | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/admin/ai'
     | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
@@ -642,6 +654,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/ai': {
+      id: '/admin/ai'
+      path: '/ai'
+      fullPath: '/admin/ai'
+      preLoaderRoute: typeof AdminAiRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/account/tracking': {
       id: '/account/tracking'
       path: '/tracking'
@@ -728,6 +747,7 @@ const AdminCustomersRouteWithChildren = AdminCustomersRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAiRoute: typeof AdminAiRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminBannersRoute: typeof AdminBannersRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
@@ -743,6 +763,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAiRoute: AdminAiRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminBannersRoute: AdminBannersRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
