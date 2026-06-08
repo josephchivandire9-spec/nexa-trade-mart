@@ -25,7 +25,11 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
+import { Route as AdminSupportRouteImport } from './routes/admin.support'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminRewardsRouteImport } from './routes/admin.rewards'
+import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
+import { Route as AdminPromotionsRouteImport } from './routes/admin.promotions'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
@@ -33,6 +37,8 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminAiRouteImport } from './routes/admin.ai'
 import { Route as AccountTrackingRouteImport } from './routes/account.tracking'
 import { Route as AccountSettingsRouteImport } from './routes/account.settings'
 import { Route as AccountRewardsRouteImport } from './routes/account.rewards'
@@ -121,9 +127,29 @@ const ProductHandleRoute = ProductHandleRouteImport.update({
   path: '/product/$handle',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSupportRoute = AdminSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRewardsRoute = AdminRewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReferralsRoute = AdminReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPromotionsRoute = AdminPromotionsRouteImport.update({
+  id: '/promotions',
+  path: '/promotions',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
@@ -159,6 +185,16 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
 const AdminBannersRoute = AdminBannersRouteImport.update({
   id: '/banners',
   path: '/banners',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAiRoute = AdminAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => AdminRoute,
 } as any)
 const AccountTrackingRoute = AccountTrackingRouteImport.update({
@@ -218,6 +254,8 @@ export interface FileRoutesByFullPath {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
@@ -225,7 +263,11 @@ export interface FileRoutesByFullPath {
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
@@ -250,6 +292,8 @@ export interface FileRoutesByTo {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
@@ -257,7 +301,11 @@ export interface FileRoutesByTo {
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin': typeof AdminIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
@@ -284,6 +332,8 @@ export interface FileRoutesById {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
@@ -291,7 +341,11 @@ export interface FileRoutesById {
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
@@ -319,6 +373,8 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/admin/ai'
+    | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/customers'
@@ -326,7 +382,11 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/orders'
     | '/admin/products'
+    | '/admin/promotions'
+    | '/admin/referrals'
     | '/admin/rewards'
+    | '/admin/settings'
+    | '/admin/support'
     | '/product/$handle'
     | '/admin/'
     | '/admin/customers/$id'
@@ -351,6 +411,8 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/admin/ai'
+    | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/customers'
@@ -358,7 +420,11 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/orders'
     | '/admin/products'
+    | '/admin/promotions'
+    | '/admin/referrals'
     | '/admin/rewards'
+    | '/admin/settings'
+    | '/admin/support'
     | '/product/$handle'
     | '/admin'
     | '/admin/customers/$id'
@@ -384,6 +450,8 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/admin/ai'
+    | '/admin/analytics'
     | '/admin/banners'
     | '/admin/categories'
     | '/admin/customers'
@@ -391,7 +459,11 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/orders'
     | '/admin/products'
+    | '/admin/promotions'
+    | '/admin/referrals'
     | '/admin/rewards'
+    | '/admin/settings'
+    | '/admin/support'
     | '/product/$handle'
     | '/admin/'
     | '/admin/customers/$id'
@@ -529,11 +601,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductHandleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/support': {
+      id: '/admin/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AdminSupportRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/rewards': {
       id: '/admin/rewards'
       path: '/rewards'
       fullPath: '/admin/rewards'
       preLoaderRoute: typeof AdminRewardsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/referrals': {
+      id: '/admin/referrals'
+      path: '/referrals'
+      fullPath: '/admin/referrals'
+      preLoaderRoute: typeof AdminReferralsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/promotions': {
+      id: '/admin/promotions'
+      path: '/promotions'
+      fullPath: '/admin/promotions'
+      preLoaderRoute: typeof AdminPromotionsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/products': {
@@ -583,6 +683,20 @@ declare module '@tanstack/react-router' {
       path: '/banners'
       fullPath: '/admin/banners'
       preLoaderRoute: typeof AdminBannersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/ai': {
+      id: '/admin/ai'
+      path: '/ai'
+      fullPath: '/admin/ai'
+      preLoaderRoute: typeof AdminAiRouteImport
       parentRoute: typeof AdminRoute
     }
     '/account/tracking': {
@@ -671,6 +785,8 @@ const AdminCustomersRouteWithChildren = AdminCustomersRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAiRoute: typeof AdminAiRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminBannersRoute: typeof AdminBannersRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
@@ -678,11 +794,17 @@ interface AdminRouteChildren {
   AdminMessagesRoute: typeof AdminMessagesRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminProductsRoute: typeof AdminProductsRoute
+  AdminPromotionsRoute: typeof AdminPromotionsRoute
+  AdminReferralsRoute: typeof AdminReferralsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSupportRoute: typeof AdminSupportRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAiRoute: AdminAiRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminBannersRoute: AdminBannersRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCustomersRoute: AdminCustomersRouteWithChildren,
@@ -690,7 +812,11 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMessagesRoute: AdminMessagesRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminProductsRoute: AdminProductsRoute,
+  AdminPromotionsRoute: AdminPromotionsRoute,
+  AdminReferralsRoute: AdminReferralsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminSupportRoute: AdminSupportRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
