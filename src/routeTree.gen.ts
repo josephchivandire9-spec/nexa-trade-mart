@@ -27,6 +27,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminRewardsRouteImport } from './routes/admin.rewards'
+import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
 import { Route as AdminPromotionsRouteImport } from './routes/admin.promotions'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
@@ -133,6 +134,11 @@ const AdminSupportRoute = AdminSupportRouteImport.update({
 const AdminRewardsRoute = AdminRewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReferralsRoute = AdminReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPromotionsRoute = AdminPromotionsRouteImport.update({
@@ -252,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -326,6 +334,7 @@ export interface FileRoutesById {
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -365,6 +374,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/promotions'
+    | '/admin/referrals'
     | '/admin/rewards'
     | '/admin/support'
     | '/product/$handle'
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/promotions'
+    | '/admin/referrals'
     | '/admin/rewards'
     | '/admin/support'
     | '/product/$handle'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/promotions'
+    | '/admin/referrals'
     | '/admin/rewards'
     | '/admin/support'
     | '/product/$handle'
@@ -589,6 +601,13 @@ declare module '@tanstack/react-router' {
       path: '/rewards'
       fullPath: '/admin/rewards'
       preLoaderRoute: typeof AdminRewardsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/referrals': {
+      id: '/admin/referrals'
+      path: '/referrals'
+      fullPath: '/admin/referrals'
+      preLoaderRoute: typeof AdminReferralsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/promotions': {
@@ -757,6 +776,7 @@ interface AdminRouteChildren {
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminPromotionsRoute: typeof AdminPromotionsRoute
+  AdminReferralsRoute: typeof AdminReferralsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -773,6 +793,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminOrdersRoute: AdminOrdersRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminPromotionsRoute: AdminPromotionsRoute,
+  AdminReferralsRoute: AdminReferralsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminIndexRoute: AdminIndexRoute,
