@@ -110,6 +110,16 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function AppShell() {
   useCartSync();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin/login";
+  if (isAdmin) {
+    return (
+      <>
+        <Outlet />
+        <Toaster richColors position="top-center" />
+      </>
+    );
+  }
   return (
     <>
       <Header />
