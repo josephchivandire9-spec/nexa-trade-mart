@@ -26,7 +26,9 @@ export function useBanners() {
       if (error) throw error;
       return (data ?? []) as Banner[];
     },
-    staleTime: 60_000,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   useEffect(() => {
