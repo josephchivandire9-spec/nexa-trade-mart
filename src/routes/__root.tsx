@@ -14,6 +14,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
 import { AIAssistant } from "@/components/AIAssistant";
+import { BottomNav } from "@/components/BottomNav";
 import { useCartSync } from "@/hooks/useCartSync";
 import { WelcomeModal } from "@/components/WelcomeModal";
 
@@ -111,8 +112,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function AppShell() {
   useCartSync();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin/login";
-  if (isAdmin) {
+  const isAdminLogin = pathname === "/admin/login";
+  if (isAdminLogin) {
     return (
       <>
         <Outlet />
@@ -123,13 +124,14 @@ function AppShell() {
   return (
     <>
       <Header />
-      <main className="min-h-[60vh]">
+      <main className="min-h-[60vh] pb-16 lg:pb-0">
         <Outlet />
       </main>
       <Footer />
       <WhatsAppFab />
       <AIAssistant />
       <WelcomeModal />
+      <BottomNav />
       <Toaster richColors position="top-center" />
     </>
   );
