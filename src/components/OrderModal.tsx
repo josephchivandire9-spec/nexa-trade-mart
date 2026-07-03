@@ -236,7 +236,7 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
                     <button
                       key={v}
                       type="button"
-                      onClick={() => setForm({ ...form, fulfillment: v })}
+                      onClick={() => setForm({ ...form, fulfillment: v, payment_method: v === "pickup" ? "pickup" : form.payment_method === "pickup" ? "cod" : form.payment_method })}
                       className={`h-12 rounded-lg border inline-flex items-center justify-center gap-2 text-sm font-semibold transition ${
                         active
                           ? "border-gold bg-gold/10 text-gold-deep"
