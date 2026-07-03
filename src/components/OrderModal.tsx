@@ -123,6 +123,9 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
     setSubmitting(true);
     try {
       const fulfillmentLabel = form.fulfillment === "delivery" ? "Delivery" : "Pickup";
+      const paymentLabel =
+        form.payment_method === "online" ? "Pay Online" :
+        form.payment_method === "cod" ? "Cash on Delivery" : "Pay at Pickup";
       const result = await placeOrderFn({
         data: {
           customer_name: name,
@@ -130,6 +133,7 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
           customer_address: form.fulfillment === "delivery" ? form.address.trim() : "Pickup in-store",
           notes: form.notes.trim() || null,
           fulfillment: form.fulfillment,
+          payment_method: form.payment_method,
           source: "whatsapp",
           items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
         },
@@ -141,11 +145,12 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
       const msg =
         `Hi NEXA TRADE MART, I'd like to place an order:\n\n${lines}\n\n` +
         `Subtotal: ${formatZAR(result.subtotal)}\n\n` +
-        `Name: ${name}\nPhone: ${phone}\nOption: ${fulfillmentLabel}\n` +
+        `Name: ${name}\nPhone: ${phone}\nOption: ${fulfillmentLabel}\nPayment: ${paymentLabel}\n` +
         (form.fulfillment === "delivery" ? `Address: ${form.address.trim()}\n` : "") +
         (form.notes.trim() ? `Notes: ${form.notes.trim()}\n` : "");
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
-      toast.success("Order sent! We'll confirm on WhatsApp.");
+      const waNumber = e164DigitsForWhatsApp(WHATSAPP_NUMBER.startsWith("+") ? WHATSAPP_NUMBER : `+${WHATSAPP_NUMBER}`) || WHATSAPP_NUMBER;
+      window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank");
+      toast.success(form.payment_method === "online" ? "Order sent! Payment link will be shared on WhatsApp." : "Order sent! We'll confirm on WhatsApp.");
       // Save updated profile details for signed-in customers
       if (profile) {
         updateProfile({
