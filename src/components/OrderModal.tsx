@@ -268,6 +268,42 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
 
             <div>
               <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Payment method <span className="text-destructive">*</span>
+              </label>
+              <div className="mt-1 grid grid-cols-3 gap-2">
+                {(form.fulfillment === "pickup"
+                  ? ([{ v: "pickup", label: "Pay at pickup", Icon: ShoppingBag }] as const)
+                  : ([
+                      { v: "online", label: "Pay Online", Icon: CreditCard },
+                      { v: "cod", label: "Cash on Delivery", Icon: Banknote },
+                    ] as const)
+                ).map(({ v, label, Icon }) => {
+                  const active = form.payment_method === v;
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setForm({ ...form, payment_method: v })}
+                      className={`h-14 rounded-lg border inline-flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition px-2 text-center ${
+                        active ? "border-gold bg-gold/10 text-gold-deep" : "border-border bg-background hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+              {form.payment_method === "online" && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  You'll be securely redirected to our payment gateway after confirming on WhatsApp. We never store card details.
+                </p>
+              )}
+            </div>
+
+
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                 Additional notes
               </label>
               <textarea
