@@ -1,9 +1,16 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, MapPin, Phone, Mail, Clock, MessageCircle } from "lucide-react";
+import { Facebook, Instagram, Youtube, Twitter, Linkedin, Send, MapPin, Phone, Mail, Clock, MessageCircle, Link as LinkIcon } from "lucide-react";
 import { Logo } from "./Logo";
 import { WHATSAPP_DISPLAY, WHATSAPP_NUMBER, SUPPORT_EMAIL, SUPPORT_PHONE, CATEGORIES } from "@/lib/shopify";
+import { useSocialLinks } from "@/hooks/useSocialLinks";
+
+const ICONS: Record<string, typeof Facebook> = {
+  facebook: Facebook, instagram: Instagram, youtube: Youtube, twitter: Twitter,
+  x: Twitter, linkedin: Linkedin, telegram: Send, whatsapp: MessageCircle,
+};
 
 export function Footer() {
+  const { data: socials = [] } = useSocialLinks();
   return (
     <footer className="bg-ink text-white/80 mt-20">
       <div className="border-t border-gold/30">
@@ -14,14 +21,20 @@ export function Footer() {
               A trusted retail business in Port Elizabeth / Gqeberha — affordable quality, rewarding loyalty,
               and shopping you can trust.
             </p>
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex items-center gap-2 text-sm text-gold hover:text-gold-soft"
-            >
-              <Facebook className="h-4 w-4" /> Follow on Facebook
-            </a>
+            {socials.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {socials.map((s) => {
+                  const Icon = ICONS[(s.icon || s.platform || "").toLowerCase()] ?? LinkIcon;
+                  return (
+                    <a key={s.id} href={s.url} target="_blank" rel="noreferrer"
+                      aria-label={s.label}
+                      className="h-9 w-9 inline-flex items-center justify-center rounded-full border border-gold/30 text-gold hover:bg-gold/10">
+                      <Icon className="h-4 w-4" />
+                    </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div>

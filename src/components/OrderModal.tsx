@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { X, Loader2, MessageCircle, Truck, Store, LogIn, UserPlus } from "lucide-react";
+import { X, Loader2, MessageCircle, Truck, Store, LogIn, UserPlus, CreditCard, Banknote, ShoppingBag } from "lucide-react";
 import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
 import { useServerFn } from "@tanstack/react-start";
 import { placeOrder } from "@/lib/orders.functions";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
+import { PhoneInput, e164DigitsForWhatsApp } from "@/components/PhoneInput";
 import { toast } from "sonner";
+
+type PaymentMethod = "online" | "cod" | "pickup";
 
 
 export interface OrderModalItem {
@@ -34,6 +37,7 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
     name: "",
     phone: "",
     fulfillment: "delivery" as "delivery" | "pickup",
+    payment_method: "cod" as PaymentMethod,
     address: "",
     notes: "",
   });
@@ -119,6 +123,9 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
     setSubmitting(true);
     try {
       const fulfillmentLabel = form.fulfillment === "delivery" ? "Delivery" : "Pickup";
+      const paymentLabel =
+        form.payment_method === "online" ? "Pay Online" :
+        form.payment_method === "cod" ? "Cash on Delivery" : "Pay at Pickup";
       const result = await placeOrderFn({
         data: {
           customer_name: name,
@@ -126,6 +133,7 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
           customer_address: form.fulfillment === "delivery" ? form.address.trim() : "Pickup in-store",
           notes: form.notes.trim() || null,
           fulfillment: form.fulfillment,
+          payment_method: form.payment_method,
           source: "whatsapp",
           items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
         },
@@ -137,11 +145,12 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
       const msg =
         `Hi NEXA TRADE MART, I'd like to place an order:\n\n${lines}\n\n` +
         `Subtotal: ${formatZAR(result.subtotal)}\n\n` +
-        `Name: ${name}\nPhone: ${phone}\nOption: ${fulfillmentLabel}\n` +
+        `Name: ${name}\nPhone: ${phone}\nOption: ${fulfillmentLabel}\nPayment: ${paymentLabel}\n` +
         (form.fulfillment === "delivery" ? `Address: ${form.address.trim()}\n` : "") +
         (form.notes.trim() ? `Notes: ${form.notes.trim()}\n` : "");
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
-      toast.success("Order sent! We'll confirm on WhatsApp.");
+      const waNumber = e164DigitsForWhatsApp(WHATSAPP_NUMBER.startsWith("+") ? WHATSAPP_NUMBER : `+${WHATSAPP_NUMBER}`) || WHATSAPP_NUMBER;
+      window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank");
+      toast.success(form.payment_method === "online" ? "Order sent! Payment link will be shared on WhatsApp." : "Order sent! We'll confirm on WhatsApp.");
       // Save updated profile details for signed-in customers
       if (profile) {
         updateProfile({
@@ -152,7 +161,7 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
       }
       onSuccess?.();
       onClose();
-      setForm({ name: "", phone: "", fulfillment: "delivery", address: "", notes: "" });
+      setForm({ name: "", phone: "", fulfillment: "delivery", payment_method: "cod", address: "", notes: "" });
 
     } catch (e) {
       console.error(e);
@@ -212,14 +221,10 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
               <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                 Phone number <span className="text-destructive">*</span>
               </label>
-              <input
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                placeholder="e.g. 068 496 3972"
-                inputMode="tel"
-                maxLength={30}
-                className="mt-1 w-full h-12 rounded-lg border border-border bg-background px-3 text-base outline-none focus:border-gold"
-              />
+              <div className="mt-1">
+                <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">Select your country — we save your number in international format for WhatsApp.</p>
             </div>
 
             <div>
@@ -236,7 +241,7 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
                     <button
                       key={v}
                       type="button"
-                      onClick={() => setForm({ ...form, fulfillment: v })}
+                      onClick={() => setForm({ ...form, fulfillment: v, payment_method: v === "pickup" ? "pickup" : form.payment_method === "pickup" ? "cod" : form.payment_method })}
                       className={`h-12 rounded-lg border inline-flex items-center justify-center gap-2 text-sm font-semibold transition ${
                         active
                           ? "border-gold bg-gold/10 text-gold-deep"
@@ -265,6 +270,42 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
                 />
               </div>
             )}
+
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Payment method <span className="text-destructive">*</span>
+              </label>
+              <div className="mt-1 grid grid-cols-3 gap-2">
+                {(form.fulfillment === "pickup"
+                  ? ([{ v: "pickup", label: "Pay at pickup", Icon: ShoppingBag }] as const)
+                  : ([
+                      { v: "online", label: "Pay Online", Icon: CreditCard },
+                      { v: "cod", label: "Cash on Delivery", Icon: Banknote },
+                    ] as const)
+                ).map(({ v, label, Icon }) => {
+                  const active = form.payment_method === v;
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setForm({ ...form, payment_method: v })}
+                      className={`h-14 rounded-lg border inline-flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition px-2 text-center ${
+                        active ? "border-gold bg-gold/10 text-gold-deep" : "border-border bg-background hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+              {form.payment_method === "online" && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  You'll be securely redirected to our payment gateway after confirming on WhatsApp. We never store card details.
+                </p>
+              )}
+            </div>
+
 
             <div>
               <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">

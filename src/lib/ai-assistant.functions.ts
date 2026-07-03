@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { generateText } from "ai";
+import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 const messageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -31,32 +33,26 @@ RULES:
 Then politely tell them: "I'll forward your request to our support team — please share your name and phone number so we can follow up."`;
 
 export const chatWithAssistant = createServerFn({ method: "POST" })
-  .inputValidator((d) => inputSchema.parse(d))
+  .inputValidator((d: unknown) => inputSchema.parse(d))
   .handler(async ({ data }) => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("AI assistant is not configured.");
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...data.messages],
-      }),
-    });
+    const gateway = createLovableAiGatewayProvider(apiKey);
 
-    if (!res.ok) {
-      if (res.status === 429) throw new Error("Too many messages. Please wait a moment and try again.");
-      if (res.status === 402) throw new Error("Assistant temporarily unavailable.");
-      throw new Error("Assistant could not respond. Please try again.");
+    try {
+      const { text } = await generateText({
+        model: gateway("google/gemini-3-flash-preview"),
+        system: SYSTEM_PROMPT,
+        messages: data.messages.map((m) => ({ role: m.role, content: m.content })),
+      });
+      const escalate = /\[ESCALATE\]/i.test(text);
+      const clean = text.replace(/\[ESCALATE\]/gi, "").trim();
+      return { reply: clean || "I'm here to help — could you rephrase that?", escalate };
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (/429|rate.?limit/i.test(msg)) throw new Error("Too many messages. Please wait a moment and try again.");
+      if (/402|credit|payment/i.test(msg)) throw new Error("Assistant temporarily unavailable — please contact support.");
+      throw new Error("Assistant could not respond. Please try again or contact support.");
     }
-
-    const json = await res.json();
-    const content: string = json.choices?.[0]?.message?.content ?? "";
-    const escalate = /\[ESCALATE\]/i.test(content);
-    const clean = content.replace(/\[ESCALATE\]/gi, "").trim();
-    return { reply: clean, escalate };
   });

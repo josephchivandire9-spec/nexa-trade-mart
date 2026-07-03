@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Bot, X, Send, Loader2, Sparkles, LifeBuoy } from "lucide-react";
+import { Bot, X, Send, Loader2, Sparkles, LifeBuoy, MessageCircle } from "lucide-react";
 import { chatWithAssistant } from "@/lib/ai-assistant.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { WHATSAPP_NUMBER } from "@/lib/shopify";
 import { toast } from "sonner";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -19,6 +20,7 @@ export function AIAssistant() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [escalating, setEscalating] = useState(false);
+  const [lastFailed, setLastFailed] = useState(false);
   const [contact, setContact] = useState({ name: "", phone: "" });
   const scrollRef = useRef<HTMLDivElement>(null);
   const chat = useServerFn(chatWithAssistant);
@@ -27,6 +29,16 @@ export function AIAssistant() {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, open]);
 
+  async function callWithRetry(payload: { role: "user" | "assistant"; content: string }[]) {
+    try {
+      return await chat({ data: { messages: payload } });
+    } catch (e) {
+      // one automatic retry after brief backoff
+      await new Promise((r) => setTimeout(r, 800));
+      return await chat({ data: { messages: payload } });
+    }
+  }
+
   async function send() {
     const text = input.trim();
     if (!text || loading) return;
@@ -34,18 +46,19 @@ export function AIAssistant() {
     setMessages(next);
     setInput("");
     setLoading(true);
+    setLastFailed(false);
     try {
-      const { reply, escalate } = await chat({
-        data: { messages: next.slice(-10).map((m) => ({ role: m.role, content: m.content })) },
-      });
+      const payload = next.slice(-10).map((m) => ({ role: m.role, content: m.content }));
+      const { reply, escalate } = await callWithRetry(payload);
       setMessages((m) => [...m, { role: "assistant", content: reply || "I'm here to help." }]);
       if (escalate) setEscalating(true);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Something went wrong.";
       toast.error(msg);
+      setLastFailed(true);
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: "Sorry, I couldn't respond right now. Please try again or contact our team on WhatsApp." },
+        { role: "assistant", content: "Sorry, I couldn't respond right now. You can retry, or reach our team directly below." },
       ]);
     } finally {
       setLoading(false);
@@ -85,7 +98,8 @@ export function AIAssistant() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Chat with NEXA AI"
-        className="fixed bottom-24 right-5 z-50 h-14 w-14 rounded-full bg-ink text-gold border border-gold/40 shadow-gold flex items-center justify-center hover:scale-105 transition"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 10rem)" }}
+        className="fixed lg:!bottom-24 right-5 z-50 h-14 w-14 rounded-full bg-ink text-gold border border-gold/40 shadow-gold flex items-center justify-center hover:scale-105 transition"
       >
         <Bot className="h-6 w-6" />
         <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-gold animate-pulse" />
@@ -129,6 +143,29 @@ export function AIAssistant() {
                   </div>
                 </div>
               )}
+
+              {lastFailed && !escalating && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 space-y-2">
+                  <p className="text-xs text-muted-foreground">Still stuck? Reach our team directly:</p>
+                  <div className="flex gap-2">
+                    <a
+                      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi NEXA TRADE MART, I need help.")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 h-9 rounded-lg bg-[#25D366] text-white text-xs font-bold inline-flex items-center justify-center gap-1"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                    </a>
+                    <button
+                      onClick={() => { setEscalating(true); setLastFailed(false); }}
+                      className="flex-1 h-9 rounded-lg gradient-gold text-ink text-xs font-bold inline-flex items-center justify-center gap-1"
+                    >
+                      <LifeBuoy className="h-3.5 w-3.5" /> Contact support
+                    </button>
+                  </div>
+                </div>
+              )}
+
 
               {escalating && (
                 <div className="rounded-xl border border-gold/40 bg-gold/5 p-3 space-y-2">

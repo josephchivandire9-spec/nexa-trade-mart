@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PhoneInput } from "@/components/PhoneInput";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -127,8 +128,7 @@ function ProfilePanel() {
         </div>
         <div>
           <label className="text-xs uppercase tracking-widest text-muted-foreground">Phone</label>
-          <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            className={input} maxLength={30} inputMode="tel" />
+          <div className="mt-1"><PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} /></div>
         </div>
         <div className="sm:col-span-2">
           <label className="text-xs uppercase tracking-widest text-muted-foreground">Default address</label>

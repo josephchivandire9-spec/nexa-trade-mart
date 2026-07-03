@@ -34,6 +34,7 @@ const SIDE_GROUPS: { label: string; items: NavItem[] }[] = [
     label: "Engagement",
     items: [
       { to: "/admin/banners", label: "Banners", icon: ImageIcon },
+      { to: "/admin/social", label: "Social Links", icon: ImageIcon },
       { to: "/admin/promotions", label: "Promotions", icon: Megaphone },
       { to: "/admin/messages", label: "Notifications", icon: MessageSquare },
       { to: "/admin/ai", label: "AI Monitoring", icon: Bot },

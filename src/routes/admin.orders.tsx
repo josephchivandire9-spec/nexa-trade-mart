@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
+import { e164DigitsForWhatsApp } from "@/components/PhoneInput";
 import { toast } from "sonner";
 import { Trash2, Search, MessageCircle } from "lucide-react";
 
@@ -56,7 +57,7 @@ function AdminOrders() {
     const msg =
       `Hi ${o.customer_name}, this is NEXA TRADE MART confirming your order #${o.id.slice(0, 8)}:\n\n${lines}\n\n` +
       `Total: ${formatZAR(o.total)}\nStatus: ${o.status}`;
-    const phone = (o.customer_phone || "").replace(/\D/g, "");
+    const phone = e164DigitsForWhatsApp(o.customer_phone) || (o.customer_phone || "").replace(/\D/g, "");
     return `https://wa.me/${phone || WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   }
 

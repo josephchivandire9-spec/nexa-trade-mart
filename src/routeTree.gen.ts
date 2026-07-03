@@ -26,6 +26,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
+import { Route as AdminSocialRouteImport } from './routes/admin.social'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminRewardsRouteImport } from './routes/admin.rewards'
 import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
@@ -130,6 +131,11 @@ const ProductHandleRoute = ProductHandleRouteImport.update({
 const AdminSupportRoute = AdminSupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSocialRoute = AdminSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
@@ -267,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/social': typeof AdminSocialRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin/': typeof AdminIndexRoute
@@ -305,6 +312,7 @@ export interface FileRoutesByTo {
   '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/social': typeof AdminSocialRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin': typeof AdminIndexRoute
@@ -345,6 +353,7 @@ export interface FileRoutesById {
   '/admin/referrals': typeof AdminReferralsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/social': typeof AdminSocialRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
   '/admin/': typeof AdminIndexRoute
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
     | '/admin/referrals'
     | '/admin/rewards'
     | '/admin/settings'
+    | '/admin/social'
     | '/admin/support'
     | '/product/$handle'
     | '/admin/'
@@ -424,6 +434,7 @@ export interface FileRouteTypes {
     | '/admin/referrals'
     | '/admin/rewards'
     | '/admin/settings'
+    | '/admin/social'
     | '/admin/support'
     | '/product/$handle'
     | '/admin'
@@ -463,6 +474,7 @@ export interface FileRouteTypes {
     | '/admin/referrals'
     | '/admin/rewards'
     | '/admin/settings'
+    | '/admin/social'
     | '/admin/support'
     | '/product/$handle'
     | '/admin/'
@@ -606,6 +618,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/admin/support'
       preLoaderRoute: typeof AdminSupportRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/social': {
+      id: '/admin/social'
+      path: '/social'
+      fullPath: '/admin/social'
+      preLoaderRoute: typeof AdminSocialRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/settings': {
@@ -798,6 +817,7 @@ interface AdminRouteChildren {
   AdminReferralsRoute: typeof AdminReferralsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSocialRoute: typeof AdminSocialRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -816,6 +836,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminReferralsRoute: AdminReferralsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminSocialRoute: AdminSocialRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -842,13 +863,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

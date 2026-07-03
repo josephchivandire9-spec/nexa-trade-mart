@@ -1,54 +1,83 @@
-# NEXA TRADE MART — Phased Upgrade Plan
 
-A lot of what you asked for already exists in the codebase (customer auth, profiles with Customer IDs, addresses, rewards, referrals, orders, admin dashboard, AI assistant, multi-image gallery, welcome modal, sequential customer IDs, admin notifications). Rather than rebuild, I'll **extend and polish** in 5 focused turns. Each turn is self-contained and reviewable.
+# NEXA TRADE MART — Bug fixes & professional upgrades
 
-## Diagnosis of the "banner not showing" bug
+Only fixes and additive upgrades. No feature removal, no rebuild.
 
-Tested with the publishable key directly — the API returns all 5 active banners and the `BannerCarousel` renders them on `/`. The data + RLS are correct. If you're not seeing banners, it's likely a stale browser cache or you're viewing the published (older) build. **No code fix needed**, but I'll add a short `staleTime` + force refresh in Turn 1 to guarantee instant admin→public sync.
+## 1. Product editing (critical)
 
----
+The editor form code is correct — it already calls `UPDATE ... WHERE id = form.id`. The most likely cause of "can't edit existing products" is either an RLS policy gap on UPDATE/DELETE or a silent failure on the storage upload.
 
-## Turn 1 — Foundation (this turn)
+Actions:
+- Migration: audit and (re)create RLS policies on `public.products` so admins (`has_role(auth.uid(), 'admin')`) can `UPDATE` and `DELETE`. Same audit for `storage.objects` under the `store-media/products/` prefix.
+- Add clearer error surfacing in `ProductEditor.save()` — log `error.code`, `error.message`, and `error.details` to a toast so future failures are visible.
+- Add an explicit "Delete product" button inside the editor (currently only on the list row).
+- Verify by editing a real product end-to-end after the migration.
 
-1. **Banner sync hardening** — drop `staleTime` to 0 + add manual `refetchOnWindowFocus` so admin edits show instantly.
-2. **Welcome modal upgrade** — add "Continue with Google" as the primary CTA next to Sign in / Create account / Continue as guest; full-screen on mobile.
-3. **Enable Stripe payments** — call the Lovable built-in Stripe tool (test environment ready immediately, no account needed). I'll confirm with you before calling it.
+## 2. NEXA AI assistant "Failed to fetch"
 
-## Turn 2 — Checkout with 3 options
+`src/lib/ai-assistant.functions.ts` uses raw fetch against the AI gateway. Failure is most likely 402 (credits) or a transient network error surfaced as generic "Failed to fetch".
 
-1. Refactor `OrderModal` to show **Pay Online / Cash on Delivery / WhatsApp** as primary choice.
-2. **WhatsApp** path: existing flow (works today).
-3. **COD** path: place order with `payment_status='cod_pending'`, auto-open WhatsApp summary to admin.
-4. **Pay Online** path: create Stripe Checkout Session via a `createServerFn`, redirect, success page marks order paid via webhook at `/api/public/stripe-webhook`.
-5. DB migration: add `payment_status`, `payment_provider`, `payment_reference` columns to `orders` (preserves existing rows).
+Actions:
+- Rewrite the server fn to use the Lovable AI SDK gateway helper (`createLovableAiGatewayProvider` in `src/lib/ai-gateway.server.ts`) with `google/gemini-3-flash-preview`. Map 429/402 to friendly messages.
+- In `AIAssistant.tsx`: add one automatic retry with backoff, a persistent typing indicator, and when a call fails twice show inline **Contact Support** and **WhatsApp Support** buttons (open `contact_messages` escalation form / `wa.me` link).
+- Verify `LOVABLE_API_KEY` is present (already listed in secrets).
 
-## Turn 3 — Live order tracking timeline
+## 3. Floating buttons overlap bottom nav
 
-1. Rebuild `/account/tracking` with an Amazon/Takealot-style vertical timeline: Placed → Processing → Shipped → Out for delivery → Delivered.
-2. Add `tracking_events` table (order_id, status, note, created_at) + admin UI to push status updates.
-3. Realtime subscription so the customer page updates without refresh.
+`WhatsAppFab` uses `bottom-5` and `AIAssistant` FAB uses `bottom-24` — both sit under the mobile bottom nav (56 px + safe-area).
 
-## Turn 4 — Home feed redesign + mobile bottom nav
+Actions:
+- Bump on mobile: WhatsApp `bottom-20 lg:bottom-5`, AI FAB `bottom-36 lg:bottom-24`, both including `pb-[env(safe-area-inset-bottom)]` clearance.
+- Add `lg:pb-0` reset on `<main>` so desktop is unchanged.
 
-1. Redesign `/` as a scrollable feed: search bar + notifications top, banners, categories chip row, "Featured" + "New arrivals" + full product grid.
-2. Add mobile-only bottom tab bar: Home / Rewards / AI Chat / Promotions / Account.
-3. Keep desktop header untouched.
+## 4. International phone number input
 
-## Turn 5 — AI escalation + admin polish
+Actions:
+- Add `libphonenumber-js` and build a small `<PhoneInput>` component: country selector (flag + name + dial code) + national number input, output as E.164 string.
+- Use it in: `OrderModal`, `/account` profile, `/account/addresses`, `/contact`, and admin customer edit.
+- Migration: no schema change (`phone TEXT` already stores strings); backfill nothing — new entries save E.164.
 
-1. AI assistant: add "Talk to a human" button that creates a row in `contact_messages` with `source='ai_escalation'` and the chat transcript in `meta`.
-2. Admin notifications: WhatsApp deep-link button on each new-order/new-message notification.
-3. Admin support inbox shows AI escalations with full transcript.
+## 5. WhatsApp notifications use stored international number
 
----
+Actions:
+- In `admin.orders.tsx` and `admin.customers.*`, add a "Notify on WhatsApp" button that opens `https://wa.me/<digits-only from stored E.164>?text=...` with an order-status template.
+- Guard: if a legacy customer's phone isn't E.164, prompt admin to update it via the new PhoneInput before sending.
+
+## 6. Dynamic social media manager
+
+Actions:
+- Migration: `public.social_links(id, platform, label, url, icon, sort_order, is_enabled)` + GRANTs + RLS (`SELECT` public for enabled, admin manages).
+- New admin page `/admin/social` with add/edit/delete/reorder/toggle.
+- `Footer.tsx` fetches from `social_links` where `is_enabled = true` and renders icons (lucide + fallback generic link icon).
+
+## 7. Payment method scaffolding
+
+Actions:
+- Extend the order flow (`OrderModal` → `placeOrder`): add radio group **Pay Online / Cash on Delivery / Store Pickup**.
+- Migration: add `payment_method` (`'online'|'cod'|'pickup'`) and `payment_status` (`'pending'|'cash_pending'|'awaiting_pickup'|'paid'|'failed'`) and `payment_reference TEXT` on `orders`.
+- Server fn sets `payment_status` based on method (`cod → cash_pending`, `pickup → awaiting_pickup`, `online → pending`).
+- Online provider integration is out of scope for this turn — leave a clearly-marked TODO and a placeholder confirmation screen. Ask the user which provider (PayFast / Peach / Stripe) after this batch lands.
+- Admin orders table shows the new fields with color chips.
+
+## 8. Mobile polish
+
+Actions:
+- Add bottom padding (`pb-24 lg:pb-6`) to primary scroll containers (account, admin, shop) so content isn't hidden under the nav.
+- Audit `AdminLayout` sidebar to collapse cleanly on <lg (already partly done).
+- Ensure product grid uses `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4` and buttons wrap.
+
+## 9. Final QA
+
+Manual pass in preview after each group (product edit, AI, FAB position, phone input, social manager, payment radios). Report the checks with screenshots via Playwright before ending.
 
 ## Technical notes
 
-- **No data loss**: every migration is additive (new columns/tables, no drops).
-- **No route restructure**: all existing routes keep working; new routes added under existing namespaces (`/account/*`, `/admin/*`, `/api/public/*`).
-- **Stripe** is the Lovable built-in (no Stripe account needed to test). Real payouts require claiming the account later. If you'd prefer PayFast for South African rand payouts, say so before Turn 2 and I'll swap.
-- **Role gating**: admin routes already gated by `has_role(uid,'admin')` policies + `AdminLayout` redirect. The admin login route stays at `/admin/login` and is `noindex` — not linked from any customer surface.
+- Migrations touched: `products` RLS audit, new `social_links` table, `orders` payment columns.
+- New deps: `libphonenumber-js` (small, edge-safe).
+- New files: `src/components/PhoneInput.tsx`, `src/lib/ai-gateway.server.ts`, `src/routes/admin.social.tsx`, `src/hooks/useSocialLinks.ts`.
+- Files edited: `admin.products.tsx`, `ai-assistant.functions.ts`, `AIAssistant.tsx`, `WhatsAppFab.tsx`, `BottomNav.tsx` (unchanged), `Footer.tsx`, `OrderModal.tsx`, `orders.functions.ts`, `admin.orders.tsx`, profile/address/contact routes.
+- Nothing removed; all existing features preserved.
 
-## After approval
+## One open question
 
-I'll start Turn 1 immediately. Tell me **"go"** to proceed with Turn 1, or **"start with Turn N"** to jump ahead. If you want PayFast instead of Stripe, mention it now.
+For **Pay Online**, do you want me to wire up **PayFast** (best for ZA), **Peach Payments**, or **Stripe** in the next batch? This turn only scaffolds the method selection.
