@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
+import { e164DigitsForWhatsApp } from "@/components/PhoneInput";
 import { toast } from "sonner";
 import { Trash2, Search, MessageCircle } from "lucide-react";
 
