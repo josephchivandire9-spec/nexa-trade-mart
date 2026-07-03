@@ -261,17 +261,39 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
         is_active: form.is_active,
         is_featured: form.is_featured,
       };
-      const { error } = form.id
-        ? await supabase.from("products").update(payload).eq("id", form.id)
-        : await supabase.from("products").insert(payload);
-      if (error) throw error;
-      toast.success(form.id ? "Product updated" : "Product created");
+      if (form.id) {
+        const { data, error } = await supabase
+          .from("products")
+          .update(payload)
+          .eq("id", form.id)
+          .select("id");
+        if (error) throw error;
+        if (!data || data.length === 0) {
+          throw new Error("Update blocked — you may not have admin permissions. Try signing out and back in.");
+        }
+        toast.success("Product updated");
+      } else {
+        const { error } = await supabase.from("products").insert(payload);
+        if (error) throw error;
+        toast.success("Product created");
+      }
       onSaved();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Save failed");
+    } catch (e: unknown) {
+      const err = e as { message?: string; code?: string; details?: string };
+      console.error("Product save failed:", err);
+      toast.error(err.message || err.details || "Save failed");
     } finally {
       setSaving(false);
     }
+  }
+
+  async function deleteProduct() {
+    if (!form.id) return;
+    if (!confirm(`Delete "${form.name}"? This cannot be undone.`)) return;
+    const { error } = await supabase.from("products").delete().eq("id", form.id);
+    if (error) return toast.error(error.message);
+    toast.success("Product deleted");
+    onSaved();
   }
 
   return (
@@ -367,11 +389,16 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
               Featured
             </label>
           </div>
-          <div className="flex gap-2 pt-3 border-t">
-            <button onClick={save} disabled={saving} className="flex-1 h-11 rounded-lg gradient-gold text-ink font-bold inline-flex items-center justify-center gap-2 disabled:opacity-50">
+          <div className="flex flex-wrap gap-2 pt-3 border-t">
+            <button onClick={save} disabled={saving} className="flex-1 min-w-[180px] h-11 rounded-lg gradient-gold text-ink font-bold inline-flex items-center justify-center gap-2 disabled:opacity-50">
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {form.id ? "Save Changes" : "Create Product"}
             </button>
+            {form.id && (
+              <button onClick={deleteProduct} className="h-11 px-4 rounded-lg border border-destructive/40 text-destructive text-sm font-semibold">
+                Delete
+              </button>
+            )}
             <button onClick={onClose} className="h-11 px-5 rounded-lg border">Cancel</button>
           </div>
         </div>

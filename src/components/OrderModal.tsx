@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { X, Loader2, MessageCircle, Truck, Store, LogIn, UserPlus } from "lucide-react";
+import { X, Loader2, MessageCircle, Truck, Store, LogIn, UserPlus, CreditCard, Banknote, ShoppingBag } from "lucide-react";
 import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
 import { useServerFn } from "@tanstack/react-start";
 import { placeOrder } from "@/lib/orders.functions";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
+import { PhoneInput, e164DigitsForWhatsApp } from "@/components/PhoneInput";
 import { toast } from "sonner";
+
+type PaymentMethod = "online" | "cod" | "pickup";
 
 
 export interface OrderModalItem {
@@ -34,6 +37,7 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
     name: "",
     phone: "",
     fulfillment: "delivery" as "delivery" | "pickup",
+    payment_method: "cod" as PaymentMethod,
     address: "",
     notes: "",
   });
@@ -152,7 +156,7 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
       }
       onSuccess?.();
       onClose();
-      setForm({ name: "", phone: "", fulfillment: "delivery", address: "", notes: "" });
+      setForm({ name: "", phone: "", fulfillment: "delivery", payment_method: "cod", address: "", notes: "" });
 
     } catch (e) {
       console.error(e);
@@ -212,14 +216,10 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
               <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                 Phone number <span className="text-destructive">*</span>
               </label>
-              <input
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                placeholder="e.g. 068 496 3972"
-                inputMode="tel"
-                maxLength={30}
-                className="mt-1 w-full h-12 rounded-lg border border-border bg-background px-3 text-base outline-none focus:border-gold"
-              />
+              <div className="mt-1">
+                <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">Select your country — we save your number in international format for WhatsApp.</p>
             </div>
 
             <div>
