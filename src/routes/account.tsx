@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PhoneInput } from "@/components/PhoneInput";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
