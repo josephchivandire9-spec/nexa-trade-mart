@@ -73,6 +73,11 @@ export const placeOrder = createServerFn({ method: "POST" })
         total: subtotal,
         source: data.source,
         customer_id: customerId,
+        payment_method: data.payment_method,
+        payment_status:
+          data.payment_method === "online" ? "pending"
+          : data.payment_method === "cod" ? "cash_pending"
+          : "awaiting_pickup",
       })
       .select("id")
       .single();
