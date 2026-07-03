@@ -57,7 +57,7 @@ function AdminOrders() {
     const msg =
       `Hi ${o.customer_name}, this is NEXA TRADE MART confirming your order #${o.id.slice(0, 8)}:\n\n${lines}\n\n` +
       `Total: ${formatZAR(o.total)}\nStatus: ${o.status}`;
-    const phone = (o.customer_phone || "").replace(/\D/g, "");
+    const phone = e164DigitsForWhatsApp(o.customer_phone) || (o.customer_phone || "").replace(/\D/g, "");
     return `https://wa.me/${phone || WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   }
 
