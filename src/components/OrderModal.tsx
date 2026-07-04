@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { X, Loader2, MessageCircle, Truck, Store, LogIn, UserPlus, CreditCard, Banknote, ShoppingBag } from "lucide-react";
+import { X, Loader2, MessageCircle, Truck, Store, LogIn, UserPlus, CreditCard, Banknote, ShoppingBag, Landmark, Copy } from "lucide-react";
 import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
 import { useServerFn } from "@tanstack/react-start";
 import { placeOrder } from "@/lib/orders.functions";
@@ -9,7 +9,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { PhoneInput, e164DigitsForWhatsApp } from "@/components/PhoneInput";
 import { toast } from "sonner";
 
-type PaymentMethod = "online" | "cod" | "pickup";
+type PaymentMethod = "online" | "eft" | "cod" | "pickup";
+
+export const BANKING_DETAILS = [
+  { label: "Bank Zero", holder: "Nexa Trade Mart", account: "81402200122", branch: "888000" },
+  { label: "Access Bank", holder: "Nexa Trade Mart", account: "51464600000", branch: "410506" },
+] as const;
 
 
 export interface OrderModalItem {
