@@ -148,15 +148,25 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
       const lines = result.items
         .map((i) => `• ${i.name} x${i.quantity} — ${formatZAR(i.line_total)}`)
         .join("\n");
+      const eftBlock = form.payment_method === "eft"
+        ? `\nEFT — please pay ${formatZAR(result.subtotal)} to one of:\n` +
+          BANKING_DETAILS.map((b) => `• ${b.label} — ${b.holder}\n  Acc: ${b.account} · Branch: ${b.branch}`).join("\n") +
+          `\nReference: your name + order.\n`
+        : "";
       const msg =
         `Hi NEXA TRADE MART, I'd like to place an order:\n\n${lines}\n\n` +
         `Subtotal: ${formatZAR(result.subtotal)}\n\n` +
         `Name: ${name}\nPhone: ${phone}\nOption: ${fulfillmentLabel}\nPayment: ${paymentLabel}\n` +
         (form.fulfillment === "delivery" ? `Address: ${form.address.trim()}\n` : "") +
-        (form.notes.trim() ? `Notes: ${form.notes.trim()}\n` : "");
+        (form.notes.trim() ? `Notes: ${form.notes.trim()}\n` : "") +
+        eftBlock;
       const waNumber = e164DigitsForWhatsApp(WHATSAPP_NUMBER.startsWith("+") ? WHATSAPP_NUMBER : `+${WHATSAPP_NUMBER}`) || WHATSAPP_NUMBER;
       window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank");
-      toast.success(form.payment_method === "online" ? "Order sent! Payment link will be shared on WhatsApp." : "Order sent! We'll confirm on WhatsApp.");
+      toast.success(
+        form.payment_method === "online" ? "Order sent! Payment link will be shared on WhatsApp." :
+        form.payment_method === "eft" ? "Order sent! Please complete the EFT and share proof of payment on WhatsApp." :
+        "Order sent! We'll confirm on WhatsApp."
+      );
       // Save updated profile details for signed-in customers
       if (profile) {
         updateProfile({
