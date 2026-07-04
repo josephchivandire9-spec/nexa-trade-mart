@@ -12,7 +12,7 @@ const inputSchema = z.object({
   customer_address: z.string().trim().min(1).max(300),
   notes: z.string().trim().max(500).optional().nullable(),
   fulfillment: z.enum(["delivery", "pickup"]),
-  payment_method: z.enum(["online", "cod", "pickup"]).default("cod"),
+  payment_method: z.enum(["online", "eft", "cod", "pickup"]).default("cod"),
   source: z.string().trim().max(40).default("whatsapp"),
   items: z.array(itemSchema).min(1).max(50),
 });
@@ -76,6 +76,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         payment_method: data.payment_method,
         payment_status:
           data.payment_method === "online" ? "pending"
+          : data.payment_method === "eft" ? "awaiting_eft"
           : data.payment_method === "cod" ? "cash_pending"
           : "awaiting_pickup",
       })

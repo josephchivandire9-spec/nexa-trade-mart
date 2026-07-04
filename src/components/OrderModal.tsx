@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { X, Loader2, MessageCircle, Truck, Store, LogIn, UserPlus, CreditCard, Banknote, ShoppingBag } from "lucide-react";
+import { X, Loader2, MessageCircle, Truck, Store, LogIn, UserPlus, CreditCard, Banknote, ShoppingBag, Landmark, Copy } from "lucide-react";
 import { formatZAR, WHATSAPP_NUMBER } from "@/lib/shopify";
 import { useServerFn } from "@tanstack/react-start";
 import { placeOrder } from "@/lib/orders.functions";
@@ -9,7 +9,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { PhoneInput, e164DigitsForWhatsApp } from "@/components/PhoneInput";
 import { toast } from "sonner";
 
-type PaymentMethod = "online" | "cod" | "pickup";
+type PaymentMethod = "online" | "eft" | "cod" | "pickup";
+
+export const BANKING_DETAILS = [
+  { label: "Bank Zero", holder: "Nexa Trade Mart", account: "81402200122", branch: "888000" },
+  { label: "Access Bank", holder: "Nexa Trade Mart", account: "51464600000", branch: "410506" },
+] as const;
 
 
 export interface OrderModalItem {
@@ -125,6 +130,7 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
       const fulfillmentLabel = form.fulfillment === "delivery" ? "Delivery" : "Pickup";
       const paymentLabel =
         form.payment_method === "online" ? "Pay Online" :
+        form.payment_method === "eft" ? "EFT / Bank Transfer" :
         form.payment_method === "cod" ? "Cash on Delivery" : "Pay at Pickup";
       const result = await placeOrderFn({
         data: {
@@ -142,15 +148,25 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
       const lines = result.items
         .map((i) => `• ${i.name} x${i.quantity} — ${formatZAR(i.line_total)}`)
         .join("\n");
+      const eftBlock = form.payment_method === "eft"
+        ? `\nEFT — please pay ${formatZAR(result.subtotal)} to one of:\n` +
+          BANKING_DETAILS.map((b) => `• ${b.label} — ${b.holder}\n  Acc: ${b.account} · Branch: ${b.branch}`).join("\n") +
+          `\nReference: your name + order.\n`
+        : "";
       const msg =
         `Hi NEXA TRADE MART, I'd like to place an order:\n\n${lines}\n\n` +
         `Subtotal: ${formatZAR(result.subtotal)}\n\n` +
         `Name: ${name}\nPhone: ${phone}\nOption: ${fulfillmentLabel}\nPayment: ${paymentLabel}\n` +
         (form.fulfillment === "delivery" ? `Address: ${form.address.trim()}\n` : "") +
-        (form.notes.trim() ? `Notes: ${form.notes.trim()}\n` : "");
+        (form.notes.trim() ? `Notes: ${form.notes.trim()}\n` : "") +
+        eftBlock;
       const waNumber = e164DigitsForWhatsApp(WHATSAPP_NUMBER.startsWith("+") ? WHATSAPP_NUMBER : `+${WHATSAPP_NUMBER}`) || WHATSAPP_NUMBER;
       window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank");
-      toast.success(form.payment_method === "online" ? "Order sent! Payment link will be shared on WhatsApp." : "Order sent! We'll confirm on WhatsApp.");
+      toast.success(
+        form.payment_method === "online" ? "Order sent! Payment link will be shared on WhatsApp." :
+        form.payment_method === "eft" ? "Order sent! Please complete the EFT and share proof of payment on WhatsApp." :
+        "Order sent! We'll confirm on WhatsApp."
+      );
       // Save updated profile details for signed-in customers
       if (profile) {
         updateProfile({
@@ -275,11 +291,12 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
               <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                 Payment method <span className="text-destructive">*</span>
               </label>
-              <div className="mt-1 grid grid-cols-3 gap-2">
+              <div className="mt-1 grid grid-cols-2 gap-2">
                 {(form.fulfillment === "pickup"
                   ? ([{ v: "pickup", label: "Pay at pickup", Icon: ShoppingBag }] as const)
                   : ([
                       { v: "online", label: "Pay Online", Icon: CreditCard },
+                      { v: "eft", label: "EFT / Bank Transfer", Icon: Landmark },
                       { v: "cod", label: "Cash on Delivery", Icon: Banknote },
                     ] as const)
                 ).map(({ v, label, Icon }) => {
@@ -304,7 +321,38 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
                   You'll be securely redirected to our payment gateway after confirming on WhatsApp. We never store card details.
                 </p>
               )}
+              {form.payment_method === "eft" && (
+                <div className="mt-2 rounded-lg border border-gold/40 bg-gold/5 p-3 space-y-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-gold-deep">
+                    Pay via EFT to any of these accounts
+                  </p>
+                  {BANKING_DETAILS.map((b) => (
+                    <div key={b.account} className="rounded-md bg-background/70 border border-border p-2 text-xs space-y-0.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">{b.label}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${b.label}\nAccount holder: ${b.holder}\nAccount: ${b.account}\nBranch: ${b.branch}`);
+                            toast.success(`${b.label} details copied`);
+                          }}
+                          className="inline-flex items-center gap-1 text-[10px] text-gold-deep hover:underline"
+                        >
+                          <Copy className="h-3 w-3" /> Copy
+                        </button>
+                      </div>
+                      <div className="text-muted-foreground">Holder: <span className="text-foreground">{b.holder}</span></div>
+                      <div className="text-muted-foreground">Account: <span className="text-foreground font-mono">{b.account}</span></div>
+                      <div className="text-muted-foreground">Branch: <span className="text-foreground font-mono">{b.branch}</span></div>
+                    </div>
+                  ))}
+                  <p className="text-[11px] text-muted-foreground">
+                    Use your <strong>name + order</strong> as the reference, then send proof of payment on WhatsApp to confirm your order.
+                  </p>
+                </div>
+              )}
             </div>
+
 
 
             <div>
