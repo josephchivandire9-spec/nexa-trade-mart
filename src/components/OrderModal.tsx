@@ -291,11 +291,12 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
               <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                 Payment method <span className="text-destructive">*</span>
               </label>
-              <div className="mt-1 grid grid-cols-3 gap-2">
+              <div className="mt-1 grid grid-cols-2 gap-2">
                 {(form.fulfillment === "pickup"
                   ? ([{ v: "pickup", label: "Pay at pickup", Icon: ShoppingBag }] as const)
                   : ([
                       { v: "online", label: "Pay Online", Icon: CreditCard },
+                      { v: "eft", label: "EFT / Bank Transfer", Icon: Landmark },
                       { v: "cod", label: "Cash on Delivery", Icon: Banknote },
                     ] as const)
                 ).map(({ v, label, Icon }) => {
@@ -320,7 +321,38 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
                   You'll be securely redirected to our payment gateway after confirming on WhatsApp. We never store card details.
                 </p>
               )}
+              {form.payment_method === "eft" && (
+                <div className="mt-2 rounded-lg border border-gold/40 bg-gold/5 p-3 space-y-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-gold-deep">
+                    Pay via EFT to any of these accounts
+                  </p>
+                  {BANKING_DETAILS.map((b) => (
+                    <div key={b.account} className="rounded-md bg-background/70 border border-border p-2 text-xs space-y-0.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">{b.label}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${b.label}\nAccount holder: ${b.holder}\nAccount: ${b.account}\nBranch: ${b.branch}`);
+                            toast.success(`${b.label} details copied`);
+                          }}
+                          className="inline-flex items-center gap-1 text-[10px] text-gold-deep hover:underline"
+                        >
+                          <Copy className="h-3 w-3" /> Copy
+                        </button>
+                      </div>
+                      <div className="text-muted-foreground">Holder: <span className="text-foreground">{b.holder}</span></div>
+                      <div className="text-muted-foreground">Account: <span className="text-foreground font-mono">{b.account}</span></div>
+                      <div className="text-muted-foreground">Branch: <span className="text-foreground font-mono">{b.branch}</span></div>
+                    </div>
+                  ))}
+                  <p className="text-[11px] text-muted-foreground">
+                    Use your <strong>name + order</strong> as the reference, then send proof of payment on WhatsApp to confirm your order.
+                  </p>
+                </div>
+              )}
             </div>
+
 
 
             <div>
