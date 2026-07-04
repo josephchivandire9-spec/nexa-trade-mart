@@ -76,6 +76,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         payment_method: data.payment_method,
         payment_status:
           data.payment_method === "online" ? "pending"
+          : data.payment_method === "eft" ? "awaiting_eft"
           : data.payment_method === "cod" ? "cash_pending"
           : "awaiting_pickup",
       })
