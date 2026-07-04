@@ -130,6 +130,7 @@ export function OrderModal({ open, onClose, items, onSuccess, title = "Complete 
       const fulfillmentLabel = form.fulfillment === "delivery" ? "Delivery" : "Pickup";
       const paymentLabel =
         form.payment_method === "online" ? "Pay Online" :
+        form.payment_method === "eft" ? "EFT / Bank Transfer" :
         form.payment_method === "cod" ? "Cash on Delivery" : "Pay at Pickup";
       const result = await placeOrderFn({
         data: {
