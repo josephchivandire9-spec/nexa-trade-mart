@@ -21,6 +21,7 @@ export interface Product {
   name: string;
   slug: string;
   description: string | null;
+  brand?: string | null;
   price: number;
   compare_at_price: number | null;
   discount_pct: number | null;
@@ -28,6 +29,10 @@ export interface Product {
   gallery: string[] | null;
   category_id: string | null;
   category?: { name: string; slug: string } | null;
+  colours?: string[] | null;
+  sizes?: string[] | null;
+  specifications?: unknown[] | null;
+  delivery_info?: string | null;
   stock: number;
   sku: string | null;
   is_active: boolean;
