@@ -68,6 +68,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "NEXA TRADE MART — Shop More. Save More. Get Rewarded." },
       { name: "description", content: "Premium online retail in Port Elizabeth / Gqeberha. Clothing, shoes, electronics, phones, household & beauty — fast WhatsApp ordering and reliable local delivery." },
       { name: "author", content: "NEXA TRADE MART" },
+      { name: "google-site-verification", content: "1brDULYwe-6HsBRfMY7m5jfzMf1z4KPw89gQlPWSWX8" },
       { name: "theme-color", content: "#0c0c0c" },
       { property: "og:title", content: "NEXA TRADE MART — Shop More. Save More. Get Rewarded." },
       { property: "og:description", content: "Premium online retail in Port Elizabeth / Gqeberha. Clothing, shoes, electronics, phones, household & beauty — fast WhatsApp ordering and reliable local delivery." },
