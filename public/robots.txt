@@ -1,2 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /account
+Disallow: /account/
+Disallow: /auth
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://nexa-trade-mart.lovable.app/sitemap.xml
