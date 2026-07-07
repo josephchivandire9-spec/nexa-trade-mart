@@ -9,12 +9,40 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — NEXA TRADE MART" },
-      { name: "description", content: "Get in touch with NEXA TRADE MART. We respond fast via WhatsApp, phone, or email." },
-      { property: "og:title", content: "Contact NEXA TRADE MART" },
+      { title: "Contact Nexa Trade Mart — WhatsApp, Phone & Email Support" },
+      { name: "description", content: "Get in touch with Nexa Trade Mart in South Africa. Reach us fast via WhatsApp, phone or email for orders, delivery and product support." },
+      { property: "og:title", content: "Contact Nexa Trade Mart" },
+      { property: "og:description", content: "WhatsApp, phone and email support for Nexa Trade Mart customers across South Africa." },
       { property: "og:url", content: "/contact" },
     ],
     links: [{ rel: "canonical", href: "/contact" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          url: "https://nexa-trade-mart.lovable.app/contact",
+          name: "Contact Nexa Trade Mart",
+          mainEntity: {
+            "@type": "Organization",
+            name: "Nexa Trade Mart",
+            email: "nexatrademart@gmail.com",
+            telephone: "+27684963972",
+            url: "https://nexa-trade-mart.lovable.app",
+            contactPoint: [
+              {
+                "@type": "ContactPoint",
+                telephone: "+27684963972",
+                contactType: "customer service",
+                areaServed: "ZA",
+                availableLanguage: ["English"],
+              },
+            ],
+          },
+        }),
+      },
+    ],
   }),
   component: ContactPage,
 });
