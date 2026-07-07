@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappOrdersRouteImport } from './routes/whatsapp-orders'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PromotionsRouteImport } from './routes/promotions'
@@ -56,6 +57,11 @@ const WhatsappOrdersRoute = WhatsappOrdersRouteImport.update({
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShopRoute = ShopRouteImport.update({
@@ -252,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/promotions': typeof PromotionsRoute
   '/register': typeof RegisterRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/whatsapp-orders': typeof WhatsappOrdersRoute
   '/account/addresses': typeof AccountAddressesRoute
@@ -291,6 +298,7 @@ export interface FileRoutesByTo {
   '/promotions': typeof PromotionsRoute
   '/register': typeof RegisterRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/whatsapp-orders': typeof WhatsappOrdersRoute
   '/account/addresses': typeof AccountAddressesRoute
@@ -332,6 +340,7 @@ export interface FileRoutesById {
   '/promotions': typeof PromotionsRoute
   '/register': typeof RegisterRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/whatsapp-orders': typeof WhatsappOrdersRoute
   '/account/addresses': typeof AccountAddressesRoute
@@ -374,6 +383,7 @@ export interface FileRouteTypes {
     | '/promotions'
     | '/register'
     | '/shop'
+    | '/sitemap.xml'
     | '/support'
     | '/whatsapp-orders'
     | '/account/addresses'
@@ -413,6 +423,7 @@ export interface FileRouteTypes {
     | '/promotions'
     | '/register'
     | '/shop'
+    | '/sitemap.xml'
     | '/support'
     | '/whatsapp-orders'
     | '/account/addresses'
@@ -453,6 +464,7 @@ export interface FileRouteTypes {
     | '/promotions'
     | '/register'
     | '/shop'
+    | '/sitemap.xml'
     | '/support'
     | '/whatsapp-orders'
     | '/account/addresses'
@@ -494,6 +506,7 @@ export interface RootRouteChildren {
   PromotionsRoute: typeof PromotionsRoute
   RegisterRoute: typeof RegisterRoute
   ShopRoute: typeof ShopRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
   WhatsappOrdersRoute: typeof WhatsappOrdersRoute
   ProductHandleRoute: typeof ProductHandleRoute
@@ -513,6 +526,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shop': {
@@ -856,6 +876,7 @@ const rootRouteChildren: RootRouteChildren = {
   PromotionsRoute: PromotionsRoute,
   RegisterRoute: RegisterRoute,
   ShopRoute: ShopRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
   WhatsappOrdersRoute: WhatsappOrdersRoute,
   ProductHandleRoute: ProductHandleRoute,
