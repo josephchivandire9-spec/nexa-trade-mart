@@ -64,11 +64,54 @@ function ProductPage() {
   }
 
 
+  const productUrl = `https://nexa-trade-mart.lovable.app/product/${product.slug}`;
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Product",
+        name: product.name,
+        description: product.description ?? `${product.name} — available at Nexa Trade Mart.`,
+        image: gallery.length ? gallery : undefined,
+        sku: product.sku ?? undefined,
+        brand: product.brand ? { "@type": "Brand", name: product.brand } : { "@type": "Brand", name: "Nexa Trade Mart" },
+        category: product.category?.name,
+        url: productUrl,
+        offers: {
+          "@type": "Offer",
+          url: productUrl,
+          priceCurrency: "ZAR",
+          price: product.price,
+          availability:
+            product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          itemCondition: "https://schema.org/NewCondition",
+          seller: { "@type": "Organization", name: "Nexa Trade Mart" },
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://nexa-trade-mart.lovable.app/" },
+          { "@type": "ListItem", position: 2, name: "Shop", item: "https://nexa-trade-mart.lovable.app/shop" },
+          ...(product.category
+            ? [{ "@type": "ListItem", position: 3, name: product.category.name, item: `https://nexa-trade-mart.lovable.app/shop?category=${product.category.slug}` }]
+            : []),
+          { "@type": "ListItem", position: product.category ? 4 : 3, name: product.name, item: productUrl },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="container-px mx-auto max-w-7xl py-10 sm:py-14">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
       <Link to="/shop" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-gold-deep">
         <ChevronLeft className="h-4 w-4" /> Back to shop
       </Link>
+
 
       <div className="mt-6 grid lg:grid-cols-2 gap-10">
         <ProductGallery

@@ -89,6 +89,72 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap",
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": ["Organization", "OnlineStore"],
+              "@id": "https://nexa-trade-mart.lovable.app/#organization",
+              name: "Nexa Trade Mart",
+              alternateName: "NEXA TRADE MART",
+              url: "https://nexa-trade-mart.lovable.app",
+              logo: "https://nexa-trade-mart.lovable.app/favicon.ico",
+              description:
+                "Nexa Trade Mart is an online shopping platform in South Africa offering electronics, clothing, shoes, beauty products, home & living products, phones, accessories and more.",
+              founder: {
+                "@type": "Person",
+                name: "Thulani Joseph Chivandire",
+                alternateName: "TJC",
+                jobTitle: "Founder & CEO",
+              },
+              foundingLocation: { "@type": "Place", name: "Port Elizabeth / Gqeberha, South Africa" },
+              areaServed: { "@type": "Country", name: "South Africa" },
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Port Elizabeth",
+                addressRegion: "Eastern Cape",
+                addressCountry: "ZA",
+              },
+              contactPoint: [
+                {
+                  "@type": "ContactPoint",
+                  telephone: "+27684963972",
+                  contactType: "customer service",
+                  areaServed: "ZA",
+                  availableLanguage: ["English"],
+                },
+              ],
+              email: "nexatrademart@gmail.com",
+              sameAs: [
+                "https://www.facebook.com/nexatrademart",
+                "https://www.instagram.com/nexatrademart",
+                "https://www.tiktok.com/@nexatrademart",
+                "https://twitter.com/nexatrademart",
+              ],
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://nexa-trade-mart.lovable.app/#website",
+              url: "https://nexa-trade-mart.lovable.app",
+              name: "Nexa Trade Mart",
+              publisher: { "@id": "https://nexa-trade-mart.lovable.app/#organization" },
+              inLanguage: "en-ZA",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: "https://nexa-trade-mart.lovable.app/shop?search={search_term_string}",
+                },
+                "query-input": "required name=search_term_string",
+              },
+            },
+          ],
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,

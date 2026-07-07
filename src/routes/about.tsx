@@ -4,11 +4,32 @@ import { Award, Target, Eye, TrendingUp } from "lucide-react";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About Us — NEXA TRADE MART" },
-      { name: "description", content: "NEXA TRADE MART is a trusted retail business in Port Elizabeth / Gqeberha providing affordable quality products and rewarding loyal customers." },
+      { title: "About Nexa Trade Mart — Online Shopping in South Africa" },
+      { name: "description", content: "Nexa Trade Mart is an online shopping platform in South Africa founded by Thulani Joseph Chivandire (TJC), offering electronics, clothing, shoes, beauty, home & living, phones and accessories." },
+      { property: "og:title", content: "About Nexa Trade Mart" },
+      { property: "og:description", content: "Learn about Nexa Trade Mart, our founder Thulani Joseph Chivandire (TJC), our mission and our online store serving South Africa." },
       { property: "og:url", content: "/about" },
     ],
     links: [{ rel: "canonical", href: "/about" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          url: "https://nexa-trade-mart.lovable.app/about",
+          name: "About Nexa Trade Mart",
+          description:
+            "Nexa Trade Mart is an online shopping platform in South Africa offering electronics, clothing, shoes, beauty products, home & living, phones and accessories.",
+          about: {
+            "@type": "Organization",
+            name: "Nexa Trade Mart",
+            founder: { "@type": "Person", name: "Thulani Joseph Chivandire", alternateName: "TJC", jobTitle: "Founder & CEO" },
+            url: "https://nexa-trade-mart.lovable.app",
+          },
+        }),
+      },
+    ],
   }),
   component: About,
 });

@@ -2,18 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-export const Route = createFileRoute("/faq")({
-  head: () => ({
-    meta: [
-      { title: "FAQ — NEXA TRADE MART" },
-      { name: "description", content: "Answers to common questions about ordering, delivery, payment, returns and rewards at NEXA TRADE MART." },
-      { property: "og:url", content: "/faq" },
-    ],
-    links: [{ rel: "canonical", href: "/faq" }],
-  }),
-  component: FAQ,
-});
-
 const faqs = [
   { q: "How do I place an order?", a: "Add items to your cart and check out securely via Shopify, or message us on WhatsApp using the WhatsApp Order button on any product." },
   { q: "Which areas do you deliver to?", a: "We deliver across Port Elizabeth / Gqeberha. Outside the metro, contact us on WhatsApp for arrangements and quotes." },
@@ -24,6 +12,34 @@ const faqs = [
   { q: "Are my payments safe?", a: "Yes. Card checkout is processed by Shopify with full encryption. We never store your card details." },
   { q: "Where are you located?", a: "Port Elizabeth / Gqeberha, South Africa. A physical store is part of our future expansion plans." },
 ];
+
+export const Route = createFileRoute("/faq")({
+  head: () => ({
+    meta: [
+      { title: "FAQ — Nexa Trade Mart Ordering, Delivery & Returns" },
+      { name: "description", content: "Answers to common questions about ordering, delivery, payment, returns and rewards at Nexa Trade Mart." },
+      { property: "og:title", content: "Nexa Trade Mart FAQ" },
+      { property: "og:description", content: "Everything you need to know about shopping at Nexa Trade Mart." },
+      { property: "og:url", content: "/faq" },
+    ],
+    links: [{ rel: "canonical", href: "/faq" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }),
+      },
+    ],
+  }),
+  component: FAQ,
+});
 
 function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
