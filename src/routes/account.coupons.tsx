@@ -56,7 +56,7 @@ function CouponsPage() {
         <h2 className="font-display text-lg">Current Promotions</h2>
         <div className="mt-3 grid sm:grid-cols-2 gap-3">
           {PROMOS.map((p) => (
-            <Link key={p.title} to={p.href} className="rounded-xl border bg-background p-4 card-hover block">
+            <Link key={p.title} to={p.href as any} className="rounded-xl border bg-background p-4 card-hover block">
               <div className="font-semibold text-sm">{p.title}</div>
               <div className="text-xs text-muted-foreground mt-0.5">{p.desc}</div>
               <div className="mt-2 text-xs font-bold text-gold-deep">{p.cta} →</div>
