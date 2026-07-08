@@ -25,6 +25,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminSocialRouteImport } from './routes/admin.social'
@@ -41,11 +42,16 @@ import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAiRouteImport } from './routes/admin.ai'
+import { Route as AccountWishlistRouteImport } from './routes/account.wishlist'
+import { Route as AccountWalletRouteImport } from './routes/account.wallet'
 import { Route as AccountTrackingRouteImport } from './routes/account.tracking'
 import { Route as AccountSettingsRouteImport } from './routes/account.settings'
 import { Route as AccountRewardsRouteImport } from './routes/account.rewards'
 import { Route as AccountReferralsRouteImport } from './routes/account.referrals'
+import { Route as AccountProfileRouteImport } from './routes/account.profile'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
+import { Route as AccountNotificationsRouteImport } from './routes/account.notifications'
+import { Route as AccountCouponsRouteImport } from './routes/account.coupons'
 import { Route as AccountAddressesRouteImport } from './routes/account.addresses'
 import { Route as AdminCustomersIdRouteImport } from './routes/admin.customers.$id'
 
@@ -129,6 +135,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AccountRoute,
+} as any)
 const ProductHandleRoute = ProductHandleRouteImport.update({
   id: '/product/$handle',
   path: '/product/$handle',
@@ -209,6 +220,16 @@ const AdminAiRoute = AdminAiRouteImport.update({
   path: '/ai',
   getParentRoute: () => AdminRoute,
 } as any)
+const AccountWishlistRoute = AccountWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountWalletRoute = AccountWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AccountRoute,
+} as any)
 const AccountTrackingRoute = AccountTrackingRouteImport.update({
   id: '/tracking',
   path: '/tracking',
@@ -229,9 +250,24 @@ const AccountReferralsRoute = AccountReferralsRouteImport.update({
   path: '/referrals',
   getParentRoute: () => AccountRoute,
 } as any)
+const AccountProfileRoute = AccountProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AccountRoute,
+} as any)
 const AccountOrdersRoute = AccountOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountNotificationsRoute = AccountNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountCouponsRoute = AccountCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
   getParentRoute: () => AccountRoute,
 } as any)
 const AccountAddressesRoute = AccountAddressesRouteImport.update({
@@ -262,11 +298,16 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/whatsapp-orders': typeof WhatsappOrdersRoute
   '/account/addresses': typeof AccountAddressesRoute
+  '/account/coupons': typeof AccountCouponsRoute
+  '/account/notifications': typeof AccountNotificationsRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/account/profile': typeof AccountProfileRoute
   '/account/referrals': typeof AccountReferralsRoute
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/account/wallet': typeof AccountWalletRoute
+  '/account/wishlist': typeof AccountWishlistRoute
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -283,13 +324,13 @@ export interface FileRoutesByFullPath {
   '/admin/social': typeof AdminSocialRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/account': typeof AccountRouteWithChildren
   '/auth': typeof AuthRoute
   '/categories': typeof CategoriesRoute
   '/contact': typeof ContactRoute
@@ -302,11 +343,16 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/whatsapp-orders': typeof WhatsappOrdersRoute
   '/account/addresses': typeof AccountAddressesRoute
+  '/account/coupons': typeof AccountCouponsRoute
+  '/account/notifications': typeof AccountNotificationsRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/account/profile': typeof AccountProfileRoute
   '/account/referrals': typeof AccountReferralsRoute
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/account/wallet': typeof AccountWalletRoute
+  '/account/wishlist': typeof AccountWishlistRoute
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -323,6 +369,7 @@ export interface FileRoutesByTo {
   '/admin/social': typeof AdminSocialRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/account': typeof AccountIndexRoute
   '/admin': typeof AdminIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
 }
@@ -344,11 +391,16 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/whatsapp-orders': typeof WhatsappOrdersRoute
   '/account/addresses': typeof AccountAddressesRoute
+  '/account/coupons': typeof AccountCouponsRoute
+  '/account/notifications': typeof AccountNotificationsRoute
   '/account/orders': typeof AccountOrdersRoute
+  '/account/profile': typeof AccountProfileRoute
   '/account/referrals': typeof AccountReferralsRoute
   '/account/rewards': typeof AccountRewardsRoute
   '/account/settings': typeof AccountSettingsRoute
   '/account/tracking': typeof AccountTrackingRoute
+  '/account/wallet': typeof AccountWalletRoute
+  '/account/wishlist': typeof AccountWishlistRoute
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -365,6 +417,7 @@ export interface FileRoutesById {
   '/admin/social': typeof AdminSocialRoute
   '/admin/support': typeof AdminSupportRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
 }
@@ -387,11 +440,16 @@ export interface FileRouteTypes {
     | '/support'
     | '/whatsapp-orders'
     | '/account/addresses'
+    | '/account/coupons'
+    | '/account/notifications'
     | '/account/orders'
+    | '/account/profile'
     | '/account/referrals'
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/account/wallet'
+    | '/account/wishlist'
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/banners'
@@ -408,13 +466,13 @@ export interface FileRouteTypes {
     | '/admin/social'
     | '/admin/support'
     | '/product/$handle'
+    | '/account/'
     | '/admin/'
     | '/admin/customers/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/account'
     | '/auth'
     | '/categories'
     | '/contact'
@@ -427,11 +485,16 @@ export interface FileRouteTypes {
     | '/support'
     | '/whatsapp-orders'
     | '/account/addresses'
+    | '/account/coupons'
+    | '/account/notifications'
     | '/account/orders'
+    | '/account/profile'
     | '/account/referrals'
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/account/wallet'
+    | '/account/wishlist'
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/banners'
@@ -448,6 +511,7 @@ export interface FileRouteTypes {
     | '/admin/social'
     | '/admin/support'
     | '/product/$handle'
+    | '/account'
     | '/admin'
     | '/admin/customers/$id'
   id:
@@ -468,11 +532,16 @@ export interface FileRouteTypes {
     | '/support'
     | '/whatsapp-orders'
     | '/account/addresses'
+    | '/account/coupons'
+    | '/account/notifications'
     | '/account/orders'
+    | '/account/profile'
     | '/account/referrals'
     | '/account/rewards'
     | '/account/settings'
     | '/account/tracking'
+    | '/account/wallet'
+    | '/account/wishlist'
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/banners'
@@ -489,6 +558,7 @@ export interface FileRouteTypes {
     | '/admin/social'
     | '/admin/support'
     | '/product/$handle'
+    | '/account/'
     | '/admin/'
     | '/admin/customers/$id'
   fileRoutesById: FileRoutesById
@@ -626,6 +696,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/account/': {
+      id: '/account/'
+      path: '/'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/product/$handle': {
       id: '/product/$handle'
       path: '/product/$handle'
@@ -738,6 +815,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAiRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/account/wishlist': {
+      id: '/account/wishlist'
+      path: '/wishlist'
+      fullPath: '/account/wishlist'
+      preLoaderRoute: typeof AccountWishlistRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/wallet': {
+      id: '/account/wallet'
+      path: '/wallet'
+      fullPath: '/account/wallet'
+      preLoaderRoute: typeof AccountWalletRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/account/tracking': {
       id: '/account/tracking'
       path: '/tracking'
@@ -766,11 +857,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountReferralsRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/account/profile': {
+      id: '/account/profile'
+      path: '/profile'
+      fullPath: '/account/profile'
+      preLoaderRoute: typeof AccountProfileRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/account/orders': {
       id: '/account/orders'
       path: '/orders'
       fullPath: '/account/orders'
       preLoaderRoute: typeof AccountOrdersRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/notifications': {
+      id: '/account/notifications'
+      path: '/notifications'
+      fullPath: '/account/notifications'
+      preLoaderRoute: typeof AccountNotificationsRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/coupons': {
+      id: '/account/coupons'
+      path: '/coupons'
+      fullPath: '/account/coupons'
+      preLoaderRoute: typeof AccountCouponsRouteImport
       parentRoute: typeof AccountRoute
     }
     '/account/addresses': {
@@ -792,20 +904,32 @@ declare module '@tanstack/react-router' {
 
 interface AccountRouteChildren {
   AccountAddressesRoute: typeof AccountAddressesRoute
+  AccountCouponsRoute: typeof AccountCouponsRoute
+  AccountNotificationsRoute: typeof AccountNotificationsRoute
   AccountOrdersRoute: typeof AccountOrdersRoute
+  AccountProfileRoute: typeof AccountProfileRoute
   AccountReferralsRoute: typeof AccountReferralsRoute
   AccountRewardsRoute: typeof AccountRewardsRoute
   AccountSettingsRoute: typeof AccountSettingsRoute
   AccountTrackingRoute: typeof AccountTrackingRoute
+  AccountWalletRoute: typeof AccountWalletRoute
+  AccountWishlistRoute: typeof AccountWishlistRoute
+  AccountIndexRoute: typeof AccountIndexRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
   AccountAddressesRoute: AccountAddressesRoute,
+  AccountCouponsRoute: AccountCouponsRoute,
+  AccountNotificationsRoute: AccountNotificationsRoute,
   AccountOrdersRoute: AccountOrdersRoute,
+  AccountProfileRoute: AccountProfileRoute,
   AccountReferralsRoute: AccountReferralsRoute,
   AccountRewardsRoute: AccountRewardsRoute,
   AccountSettingsRoute: AccountSettingsRoute,
   AccountTrackingRoute: AccountTrackingRoute,
+  AccountWalletRoute: AccountWalletRoute,
+  AccountWishlistRoute: AccountWishlistRoute,
+  AccountIndexRoute: AccountIndexRoute,
 }
 
 const AccountRouteWithChildren =
@@ -884,13 +1008,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

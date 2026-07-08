@@ -75,7 +75,7 @@ function ProfilePage() {
           initial={{ full_name: profile?.full_name ?? "", phone: profile?.phone ?? "", address: profile?.address ?? "" }}
           onClose={() => setEditing(false)}
           onSave={async (patch) => {
-            const res = (await update(patch)) ?? {};
+            const res: any = (await update(patch)) ?? {};
             if (res.error) { toast.error(res.error.message); return false; }
             return true;
           }}
