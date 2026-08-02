@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { generateText } from "ai";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { getChatModel } from "@/lib/ai/provider.server";
 
 const messageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -35,14 +35,9 @@ Then politely tell them: "I'll forward your request to our support team — plea
 export const chatWithAssistant = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => inputSchema.parse(d))
   .handler(async ({ data }) => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("AI assistant is not configured.");
-
-    const gateway = createLovableAiGatewayProvider(apiKey);
-
     try {
       const { text } = await generateText({
-        model: gateway("google/gemini-3-flash-preview"),
+        model: getChatModel(),
         system: SYSTEM_PROMPT,
         messages: data.messages.map((m) => ({ role: m.role, content: m.content })),
       });
