@@ -50,6 +50,6 @@ export const chatWithAssistant = createServerFn({ method: "POST" })
       if (/is not configured|not enabled yet/i.test(msg)) throw new Error("AI assistant is not configured.");
       if (/429|rate.?limit/i.test(msg)) throw new Error("Too many messages. Please wait a moment and try again.");
       if (/402|credit|payment/i.test(msg)) throw new Error("Assistant temporarily unavailable — please contact support.");
-      throw new Error("DEBUG:" + msg);
+      throw new Error("Assistant could not respond. Please try again or contact support.");
     }
   });
