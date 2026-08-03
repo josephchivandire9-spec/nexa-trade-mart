@@ -5,11 +5,14 @@ import { createOpenAIModel } from "./providers/openai";
 
 export type AiProviderName = "lovable" | "google" | "openai";
 
-/** Active provider, driven by env. Defaults to Lovable (current behaviour). */
+/**
+ * Active provider, driven by env. Defaults to Google Gemini.
+ * Rollback to the previous behaviour = set AI_PROVIDER=lovable (no code change).
+ */
 export function getAiProviderName(): AiProviderName {
   const raw = (process.env.AI_PROVIDER || "").toLowerCase().trim();
   if (raw === "google" || raw === "openai" || raw === "lovable") return raw;
-  return "lovable";
+  return "google";
 }
 
 /**
