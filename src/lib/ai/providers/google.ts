@@ -1,7 +1,7 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import type { LanguageModel } from "ai";
 
-export const GOOGLE_DEFAULT_MODEL = "gemini-2.5-flash";
+export const GOOGLE_DEFAULT_MODEL = "gemini-flash-latest";
 
 /**
  * Official Google Gemini adapter (Google Generative AI API).
