@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatZAR } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { storageUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/account/wishlist")({
   head: () => ({ meta: [{ title: "Wishlist — NEXA TRADE MART" }, { name: "robots", content: "noindex" }] }),
@@ -79,7 +80,7 @@ function WishlistPage() {
             <div key={p.id} className="group rounded-2xl border bg-card p-3 card-hover flex flex-col">
               <Link to="/product/$handle" params={{ handle: p.slug }} className="block relative aspect-square rounded-xl overflow-hidden bg-muted">
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={storageUrl(p.image_url)} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
                   <div className="w-full h-full grid place-items-center text-muted-foreground text-xs">No image</div>
                 )}
