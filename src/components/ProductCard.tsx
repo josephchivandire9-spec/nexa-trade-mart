@@ -5,6 +5,7 @@ import { type Product, formatZAR } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { OrderModal } from "@/components/OrderModal";
+import { storageUrl } from "@/lib/storage";
 
 export function ProductCard({ p }: { p: Product }) {
   const [orderOpen, setOrderOpen] = useState(false);
@@ -36,7 +37,7 @@ export function ProductCard({ p }: { p: Product }) {
         <div className="relative aspect-square bg-secondary overflow-hidden">
           {p.image_url ? (
             <img
-              src={p.image_url}
+              src={storageUrl(p.image_url)}
               alt={p.name}
               loading="lazy"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"

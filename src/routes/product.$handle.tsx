@@ -5,6 +5,7 @@ import { useProductBySlug } from "@/hooks/useProducts";
 import { formatZAR } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { storageUrl } from "@/lib/storage";
 import { OrderModal } from "@/components/OrderModal";
 import { ProductGallery } from "@/components/ProductGallery";
 
@@ -42,7 +43,9 @@ function ProductPage() {
     );
   }
 
-  const gallery = [product.image_url, ...(product.gallery ?? [])].filter(Boolean) as string[];
+  const gallery = ([product.image_url, ...(product.gallery ?? [])].filter(Boolean) as string[]).map(
+    (ref) => storageUrl(ref),
+  );
   const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
   const discountPct = product.discount_pct
     ? product.discount_pct
