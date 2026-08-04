@@ -3,6 +3,7 @@ import { ShoppingCart, Minus, Plus, Trash2, MessageCircle, X } from "lucide-reac
 import { useCartStore } from "@/stores/cartStore";
 import { formatZAR } from "@/lib/shopify";
 import { OrderModal } from "@/components/OrderModal";
+import { storageUrl } from "@/lib/storage";
 
 export function CartDrawer() {
   const [open, setOpen] = useState(false);
@@ -59,7 +60,7 @@ export function CartDrawer() {
                     <li key={it.productId} className="flex gap-3 border-b pb-4">
                       <div className="w-20 h-20 rounded-lg overflow-hidden bg-secondary shrink-0">
                         {it.image_url && (
-                          <img src={it.image_url} alt={it.name} className="w-full h-full object-cover" />
+                          <img src={storageUrl(it.image_url)} alt={it.name} loading="lazy" className="w-full h-full object-cover" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">

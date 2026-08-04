@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Loader2, Pencil, Plus, Star, Trash2, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatZAR } from "@/lib/shopify";
+import { removeStorageObjects, storageUrl, uploadImage, UPLOAD_ACCEPT_ATTR } from "@/lib/storage";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/products")({
@@ -148,8 +149,11 @@ function AdminProducts() {
 
   async function remove(id: string) {
     if (!confirm("Delete this product?")) return;
+    const product = (products as any[]).find((p) => p.id === id);
+    const images = product ? productImages(product) : [];
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) return toast.error(error.message);
+    await removeStorageObjects(images);
     toast.success("Product deleted");
     qc.invalidateQueries({ queryKey: ["admin-products"] });
     qc.invalidateQueries({ queryKey: ["products"] });
@@ -185,7 +189,7 @@ function AdminProducts() {
                   <div key={product.id} className="p-4 space-y-3">
                     <div className="flex gap-3">
                       <div className="h-16 w-16 rounded-lg bg-muted overflow-hidden shrink-0 relative">
-                        {imgs[0] && <img src={imgs[0]} alt={product.name} className="w-full h-full object-cover" />}
+                        {imgs[0] && <img src={storageUrl(imgs[0])} alt={product.name} loading="lazy" className="w-full h-full object-cover" />}
                         {imgs.length > 1 && (
                           <span className="absolute bottom-0 right-0 text-[9px] px-1 bg-foreground/80 text-background rounded-tl">
                             +{imgs.length - 1}
@@ -237,7 +241,7 @@ function AdminProducts() {
                         <td className="p-3">
                           <div className="flex items-center gap-3">
                             <div className="h-12 w-12 rounded-lg bg-muted overflow-hidden shrink-0 relative">
-                              {imgs[0] && <img src={imgs[0]} alt={product.name} className="w-full h-full object-cover" />}
+                              {imgs[0] && <img src={storageUrl(imgs[0])} alt={product.name} loading="lazy" className="w-full h-full object-cover" />}
                               {imgs.length > 1 && (
                                 <span className="absolute bottom-0 right-0 text-[9px] px-1 bg-foreground/80 text-background rounded-tl">
                                   +{imgs.length - 1}
@@ -306,12 +310,7 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
   const [uploading, setUploading] = useState(false);
 
   async function uploadOne(file: File) {
-    const ext = file.name.split(".").pop();
-    const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await supabase.storage.from("store-media").upload(path, file, { upsert: false });
-    if (error) throw error;
-    const { data } = supabase.storage.from("store-media").getPublicUrl(path);
-    return data.publicUrl;
+    return uploadImage(file, "products");
   }
 
   async function uploadFiles(files: FileList | null) {
@@ -402,6 +401,7 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
         if (error) throw error;
         if (!data || data.length === 0) throw new Error("Update blocked — you may not have admin permissions. Try signing out and back in.");
         toast.success("Product updated");
+        await removeStorageObjects(initial.images.filter((img) => !form.images.includes(img)));
       } else {
         const { error } = await supabase.from("products").insert(payload);
         if (error) throw error;
@@ -422,6 +422,7 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
     if (!confirm(`Delete “${form.name}”? This cannot be undone.`)) return;
     const { error } = await supabase.from("products").delete().eq("id", form.id);
     if (error) return toast.error(error.message);
+    await removeStorageObjects(form.images);
     toast.success("Product deleted");
     onSaved();
   }
@@ -456,14 +457,14 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-3">
                 {form.images.map((url, i) => (
                   <div key={url + i} className={`relative aspect-square rounded-lg overflow-hidden border ${i === 0 ? "border-gold ring-2 ring-gold/30" : "border-border"}`}>
-                    <img src={url} alt={`${form.name || "Product"} image ${i + 1}`} className="w-full h-full object-cover" />
+                    <img src={storageUrl(url)} alt={`${form.name || "Product"} image ${i + 1}`} loading="lazy" className="w-full h-full object-cover" />
                     {i === 0 && <span className="absolute top-1 left-1 text-[9px] px-1.5 py-0.5 rounded bg-gold text-ink font-bold uppercase tracking-wider">Main</span>}
                     <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 h-6 w-6 rounded-full bg-foreground/80 text-background inline-flex items-center justify-center hover:bg-destructive" aria-label="Remove image">
                       <X className="h-3 w-3" />
                     </button>
                     <label className="absolute left-1 bottom-8 right-1 h-6 rounded bg-background/90 text-[10px] font-semibold inline-flex items-center justify-center cursor-pointer hover:bg-background">
                       Replace
-                      <input type="file" accept="image/*" hidden onChange={(e) => { replaceImage(i, e.target.files?.[0]); e.target.value = ""; }} />
+                      <input type="file" accept={UPLOAD_ACCEPT_ATTR} hidden onChange={(e) => { replaceImage(i, e.target.files?.[0]); e.target.value = ""; }} />
                     </label>
                     <div className="absolute bottom-0 inset-x-0 flex items-stretch text-[10px] bg-foreground/80 text-background">
                       <button type="button" onClick={() => moveImage(i, -1)} disabled={i === 0} className="flex-1 py-1 disabled:opacity-40 hover:bg-background/10" aria-label="Move image left"><ArrowLeft className="mx-auto h-3 w-3" /></button>
@@ -478,7 +479,7 @@ function ProductEditor({ form: initial, categories, onClose, onSaved }: {
               <label className="inline-flex items-center gap-2 min-h-10 px-3 py-2 rounded-lg border cursor-pointer hover:bg-muted text-sm">
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 Upload image(s) — up to {MAX_IMAGES - form.images.length} more
-                <input type="file" accept="image/*" hidden multiple onChange={(e) => { uploadFiles(e.target.files); e.target.value = ""; }} />
+                <input type="file" accept={UPLOAD_ACCEPT_ATTR} hidden multiple onChange={(e) => { uploadFiles(e.target.files); e.target.value = ""; }} />
               </label>
             )}
           </Field>

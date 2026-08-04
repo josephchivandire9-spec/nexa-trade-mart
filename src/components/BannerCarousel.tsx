@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useBanners } from "@/hooks/useBanners";
+import { storageUrl } from "@/lib/storage";
 
 export function BannerCarousel() {
   const { data: banners = [], isLoading } = useBanners();
@@ -32,7 +33,7 @@ export function BannerCarousel() {
             {b.image_url && (
               <img
                 key={b.id}
-                src={b.image_url}
+                src={storageUrl(b.image_url)}
                 alt={b.title}
                 className="absolute inset-0 h-full w-full object-cover opacity-90"
                 loading="eager"

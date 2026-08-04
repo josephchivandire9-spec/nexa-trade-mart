@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatZAR } from "@/lib/shopify";
 import { Package, ChevronRight, ShoppingBag } from "lucide-react";
 import { useState } from "react";
+import { storageUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/account/orders")({
   head: () => ({
@@ -95,7 +96,7 @@ function OrdersPage() {
                 className="w-full text-left p-5 flex items-start gap-4">
                 <div className="h-16 w-16 rounded-xl overflow-hidden bg-muted shrink-0 grid place-items-center">
                   {firstImg ? (
-                    <img src={firstImg} alt="" className="w-full h-full object-cover" />
+                    <img src={storageUrl(firstImg)} alt="" loading="lazy" className="w-full h-full object-cover" />
                   ) : (
                     <Package className="h-6 w-6 text-muted-foreground" />
                   )}
@@ -131,7 +132,7 @@ function OrdersPage() {
                       <li key={i} className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-lg bg-muted overflow-hidden shrink-0 grid place-items-center">
                           {it.image_url
-                            ? <img src={it.image_url} alt="" className="w-full h-full object-cover" />
+                            ? <img src={storageUrl(it.image_url)} alt="" loading="lazy" className="w-full h-full object-cover" />
                             : <Package className="h-4 w-4 text-muted-foreground" />}
                         </div>
                         <div className="flex-1 min-w-0">
