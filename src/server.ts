@@ -66,13 +66,34 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
+// Node's dev http server surfaces client disconnects mid-SSR as
+// "Error: aborted" / ECONNRESET. Those are not app failures — the browser
+// simply went away (e.g. HMR reload) — so respond minimally instead of
+// rendering the branded error page.
+function isClientAbort(error: unknown): boolean {
+  const e = error as { name?: string; message?: string; code?: string } | null;
+  if (!e || typeof e !== "object") return false;
+  if (e.name === "AbortError" || e.code === "ECONNRESET") return true;
+  return /\baborted\b|ECONNRESET/i.test(String(e.message ?? ""));
+}
+
+function minimalAbortResponse(): Response {
+  return new Response(null, { status: 499, statusText: "Client Closed Request" });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
+      // If the browser already disconnected, never build/return a full error
+      // page for it — just acknowledge the dead socket quietly.
+      if (request.signal?.aborted) return minimalAbortResponse();
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
+      if (request.signal?.aborted || isClientAbort(error)) {
+        return minimalAbortResponse();
+      }
       console.error(error);
       return brandedErrorResponse();
     }
