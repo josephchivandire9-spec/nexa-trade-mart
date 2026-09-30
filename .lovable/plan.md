@@ -1,83 +1,42 @@
+# Nexa Trade Mart — Read-only Infrastructure Audit (2026-09-30)
 
-# NEXA TRADE MART — Bug fixes & professional upgrades
+Nothing was edited or deployed. F = verified fact (evidence given). H = hypothesis.
 
-Only fixes and additive upgrades. No feature removal, no rebuild.
+## 1. Latest project / commit state
+- F: HEAD `745bee1` "Fixed browser crash on load" (2026-09-28 16:45 UTC). Prior: `412b33e`, `b8a9521`, `a0093e9` ("Changes"), `4e91c46` "Work in progress", `7dc29a4` "Update wrangler config name to nexa-trade-mart".
+- F: Last 5 commits touched: `src/server.ts` (client-abort handling), `src/routes/__root.tsx`, `src/integrations/supabase/client.ts` + new `previewAuthStorage.ts`, `types.ts`, `package.json`/`bun.lock`, `wrangler.jsonc` (name), `AI_RULES.md`, `AI_START.md`, `ROADMAP.md`, `routeTree.gen.ts`.
+- F: Current working branch is a Lovable edit branch; other branches: `main`, `update_worker_name_to_nexa-trade-mart`.
 
-## 1. Product editing (critical)
+## 2. GitHub connection
+- F: Git remotes visible in the sandbox are only Lovable-owned: `origin` = Lovable private git storage (`git.private.lovable-gcp.code.storage/<project-id>.git`), `secondary` = `s3://lovable-repositories/...`. No github.com remote is visible.
+- H: The branch `update_worker_name_to_nexa-trade-mart` and commits "Create AI_RULES.md…" look like they came from an external editor (GitHub-style commit titles), suggesting GitHub sync may exist, but GitHub sync is not visible from inside the sandbox. I cannot confirm repo/owner/branch — check Plus (+) → GitHub in the editor.
 
-The editor form code is correct — it already calls `UPDATE ... WHERE id = form.id`. The most likely cause of "can't edit existing products" is either an RLS policy gap on UPDATE/DELETE or a silent failure on the storage upload.
+## 3. Managed vs external infrastructure
+| Area | Status | Evidence |
+|---|---|---|
+| Database | F: Lovable Cloud-managed | `supabase/config.toml` project_id, `.env` SUPABASE_URL/VITE_* |
+| Auth (email/password) | F: same Lovable Cloud project | `src/routes/login.tsx`, `admin.login.tsx` use `supabase.auth` |
+| Google login | F: Lovable OAuth broker | `@lovable.dev/cloud-auth-js`, `src/integrations/lovable/index.ts`, called from `login.tsx:61`, `register.tsx:76`, `WelcomeModal.tsx:33` |
+| Storage | F: Lovable Cloud bucket `store-media` | `src/lib/storage.ts` |
+| AI assistant | F: Lovable AI Gateway | `src/lib/ai-assistant.functions.ts:38` reads `LOVABLE_API_KEY`, uses `src/lib/ai-gateway.server.ts` (`ai.gateway.lovable.dev`). Note: the `src/lib/ai/providers/*` Gemini layer mentioned earlier does NOT exist in the current code. |
+| Shopify helpers | F: present (`src/lib/shopify.ts`), external | — |
+| Hosting | F: Lovable (`nexa-trade-mart.lovable.app`) | project URLs |
 
-Actions:
-- Migration: audit and (re)create RLS policies on `public.products` so admins (`has_role(auth.uid(), 'admin')`) can `UPDATE` and `DELETE`. Same audit for `storage.objects` under the `store-media/products/` prefix.
-- Add clearer error surfacing in `ProductEditor.save()` — log `error.code`, `error.message`, and `error.details` to a toast so future failures are visible.
-- Add an explicit "Delete product" button inside the editor (currently only on the list row).
-- Verify by editing a real product end-to-end after the migration.
+## 4. Lovable-specific items that can break a Cloudflare deploy
+1. F: `vite.config.ts` depends on `@lovable.dev/vite-tanstack-config` (devDependency, pinned 2.23.1) — bundles tanstackStart, cloudflare plugin, env injection, `@` alias. Works outside Lovable only if installed; H: its sandbox detection/env injection may behave differently on Cloudflare CI.
+2. F: `@lovable.dev/cloud-auth-js` calls `~oauth/initiate` on the current origin and `oauth.lovable.app`. The `/~oauth/*` path is served by Lovable hosting, not by this app (no such route in `src/routes`).
+3. F: `LOVABLE_API_KEY` needed by the AI assistant — not present in a Cloudflare environment unless manually added (and keys are tied to Lovable).
+4. F: `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` are baked at build time from `.env`; server code reads `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` from `process.env`. `.env` is tracked in git, but server-side vars must also be set as Cloudflare Worker vars — `client.ts` throws "Missing Supabase environment variable(s)" otherwise.
+5. F: `src/integrations/supabase/previewAuthStorage.ts` — harmless off Lovable domains (falls back to localStorage).
+6. F: Hardcoded `https://nexa-trade-mart.lovable.app` in `sitemap[.]xml.ts:4`, `about.tsx`, `product.$handle.tsx`, `__root.tsx` JSON-LD; og:image points to a Lovable preview screenshot. SEO-only, not a crash.
+7. F: `wrangler.jsonc` main = `src/server.ts`, `nodejs_compat`; `nitro` beta also in deps. H: mismatch between Lovable's build pipeline and a raw `wrangler deploy` can produce a Worker without assets binding → static/route 404s.
 
-## 2. NEXA AI assistant "Failed to fetch"
+## 5. Forbidden / 404 after moving to Cloudflare — likely mechanism (H, not code-changed)
+- H1 (strongest, supported by F in 4.2): Google "Continue with Google" calls `/~oauth/initiate` on the Cloudflare domain. That path only exists on Lovable hosting → Cloudflare returns **404**. If it reaches `oauth.lovable.app`, the broker only accepts registered Lovable origins/redirect URIs → **Forbidden**.
+- H2: Email/password sign-in succeeds, but the auth backend's allowed Site URL / redirect list contains only Lovable domains, so email confirmation / reset links redirect back to Lovable or are rejected.
+- H3: If Worker env vars `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` are missing, protected server functions (`requireSupabaseAuth`, e.g. `src/lib/orders.functions.ts`) error, and SSR returns the branded 500 page.
+- F: Admin/account gating is client-side only (`AdminLayout.tsx:54-81` redirects to `/admin/login`; `account.tsx` uses `useAuth`); there is no `_authenticated` route layout. So the Forbidden/404 is not produced by the app's own route guards — it comes from the broker/hosting layer (H1/H2) or missing assets/env (H3, 4.7).
+- To confirm (next step, needs your input): exact URL shown when the error appears, and whether it happens on Google login, email login, or just opening /admin.
 
-`src/lib/ai-assistant.functions.ts` uses raw fetch against the AI gateway. Failure is most likely 402 (credits) or a transient network error surfaced as generic "Failed to fetch".
-
-Actions:
-- Rewrite the server fn to use the Lovable AI SDK gateway helper (`createLovableAiGatewayProvider` in `src/lib/ai-gateway.server.ts`) with `google/gemini-3-flash-preview`. Map 429/402 to friendly messages.
-- In `AIAssistant.tsx`: add one automatic retry with backoff, a persistent typing indicator, and when a call fails twice show inline **Contact Support** and **WhatsApp Support** buttons (open `contact_messages` escalation form / `wa.me` link).
-- Verify `LOVABLE_API_KEY` is present (already listed in secrets).
-
-## 3. Floating buttons overlap bottom nav
-
-`WhatsAppFab` uses `bottom-5` and `AIAssistant` FAB uses `bottom-24` — both sit under the mobile bottom nav (56 px + safe-area).
-
-Actions:
-- Bump on mobile: WhatsApp `bottom-20 lg:bottom-5`, AI FAB `bottom-36 lg:bottom-24`, both including `pb-[env(safe-area-inset-bottom)]` clearance.
-- Add `lg:pb-0` reset on `<main>` so desktop is unchanged.
-
-## 4. International phone number input
-
-Actions:
-- Add `libphonenumber-js` and build a small `<PhoneInput>` component: country selector (flag + name + dial code) + national number input, output as E.164 string.
-- Use it in: `OrderModal`, `/account` profile, `/account/addresses`, `/contact`, and admin customer edit.
-- Migration: no schema change (`phone TEXT` already stores strings); backfill nothing — new entries save E.164.
-
-## 5. WhatsApp notifications use stored international number
-
-Actions:
-- In `admin.orders.tsx` and `admin.customers.*`, add a "Notify on WhatsApp" button that opens `https://wa.me/<digits-only from stored E.164>?text=...` with an order-status template.
-- Guard: if a legacy customer's phone isn't E.164, prompt admin to update it via the new PhoneInput before sending.
-
-## 6. Dynamic social media manager
-
-Actions:
-- Migration: `public.social_links(id, platform, label, url, icon, sort_order, is_enabled)` + GRANTs + RLS (`SELECT` public for enabled, admin manages).
-- New admin page `/admin/social` with add/edit/delete/reorder/toggle.
-- `Footer.tsx` fetches from `social_links` where `is_enabled = true` and renders icons (lucide + fallback generic link icon).
-
-## 7. Payment method scaffolding
-
-Actions:
-- Extend the order flow (`OrderModal` → `placeOrder`): add radio group **Pay Online / Cash on Delivery / Store Pickup**.
-- Migration: add `payment_method` (`'online'|'cod'|'pickup'`) and `payment_status` (`'pending'|'cash_pending'|'awaiting_pickup'|'paid'|'failed'`) and `payment_reference TEXT` on `orders`.
-- Server fn sets `payment_status` based on method (`cod → cash_pending`, `pickup → awaiting_pickup`, `online → pending`).
-- Online provider integration is out of scope for this turn — leave a clearly-marked TODO and a placeholder confirmation screen. Ask the user which provider (PayFast / Peach / Stripe) after this batch lands.
-- Admin orders table shows the new fields with color chips.
-
-## 8. Mobile polish
-
-Actions:
-- Add bottom padding (`pb-24 lg:pb-6`) to primary scroll containers (account, admin, shop) so content isn't hidden under the nav.
-- Audit `AdminLayout` sidebar to collapse cleanly on <lg (already partly done).
-- Ensure product grid uses `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4` and buttons wrap.
-
-## 9. Final QA
-
-Manual pass in preview after each group (product edit, AI, FAB position, phone input, social manager, payment radios). Report the checks with screenshots via Playwright before ending.
-
-## Technical notes
-
-- Migrations touched: `products` RLS audit, new `social_links` table, `orders` payment columns.
-- New deps: `libphonenumber-js` (small, edge-safe).
-- New files: `src/components/PhoneInput.tsx`, `src/lib/ai-gateway.server.ts`, `src/routes/admin.social.tsx`, `src/hooks/useSocialLinks.ts`.
-- Files edited: `admin.products.tsx`, `ai-assistant.functions.ts`, `AIAssistant.tsx`, `WhatsAppFab.tsx`, `BottomNav.tsx` (unchanged), `Footer.tsx`, `OrderModal.tsx`, `orders.functions.ts`, `admin.orders.tsx`, profile/address/contact routes.
-- Nothing removed; all existing features preserved.
-
-## One open question
-
-For **Pay Online**, do you want me to wire up **PayFast** (best for ZA), **Peach Payments**, or **Stripe** in the next batch? This turn only scaffolds the method selection.
+## Security note
+- F: No secret values were printed in this report. The Lovable git remote URL contains an access token in the sandbox; it is not reproduced here.
