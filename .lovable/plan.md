@@ -38,5 +38,12 @@ Nothing was edited or deployed. F = verified fact (evidence given). H = hypothes
 - F: Admin/account gating is client-side only (`AdminLayout.tsx:54-81` redirects to `/admin/login`; `account.tsx` uses `useAuth`); there is no `_authenticated` route layout. So the Forbidden/404 is not produced by the app's own route guards — it comes from the broker/hosting layer (H1/H2) or missing assets/env (H3, 4.7).
 - To confirm (next step, needs your input): exact URL shown when the error appears, and whether it happens on Google login, email login, or just opening /admin.
 
+## 6. Backend ownership audit (added 2026-10-03, read-only)
+- F: Lovable Cloud-managed backend — the platform's backend status tool responded ("up and responding normally"); that tool only exists for Lovable Cloud-managed projects. Auth and database planes both reachable.
+- F: `supabase/config.toml` contains only `project_id` (Lovable Cloud project); `.env` holds `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `VITE_*` variants pointing at the same managed project. No second/external Supabase URL or key appears anywhere in the repo (`rg` over src/config found only the managed project).
+- F: Database, auth, and storage (`store-media` bucket) are all on the same Lovable Cloud project — no evidence of an external Supabase connector or user-connected Supabase account.
+- F: No external Supabase connector is configured in project files; connector knowledge lists no linked Supabase-type connection for this project.
+- Ownership implications (F, consistent with the earlier Phase 3.3 audit): the project owner cannot access a Supabase dashboard, service-role key, or database password for this backend; Google sign-in runs through Lovable's OAuth broker; migrating away requires data export (Cloud → Advanced settings → Export data), re-creating auth users (password hashes are not exportable), and re-pointing all `SUPABASE_*` env vars to a self-owned project.
+
 ## Security note
 - F: No secret values were printed in this report. The Lovable git remote URL contains an access token in the sandbox; it is not reproduced here.
