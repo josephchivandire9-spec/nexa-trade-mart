@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Lock, Mail, Loader2, User, Gift, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -71,15 +70,23 @@ function RegisterPage() {
   }
 
   async function googleSignIn() {
-    setGoogleLoading(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/account" });
-      if (result.error) throw result.error;
-      if (!result.redirected) navigate({ to: "/account" });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
-      setGoogleLoading(false);
-    }
+  setGoogleLoading(true);
+
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/account`,
+      },
+    });
+
+    if (error) throw error;
+  } catch (err) {
+    toast.error(
+      err instanceof Error ? err.message : "Google sign-in failed",
+    );
+    setGoogleLoading(false);
+  }
   }
 
   const input = "mt-1 w-full h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:border-gold";
