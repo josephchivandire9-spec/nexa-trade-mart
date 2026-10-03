@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { X, LogIn, UserPlus, ShoppingBag, Gift, Truck, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const KEY = "ntm-welcome-seen-session";
@@ -26,25 +26,27 @@ export function WelcomeModal() {
     try { sessionStorage.setItem(KEY, "1"); } catch {}
     setOpen(false);
   }
+  
+async function signInWithGoogle() {
+  setGoogleLoading(true);
 
-  async function signInWithGoogle() {
-    setGoogleLoading(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        toast.error("Could not sign in with Google. Please try again.");
-        setGoogleLoading(false);
-        return;
-      }
-      if (result.redirected) return; // browser redirecting
-      close();
-    } catch {
-      toast.error("Google sign-in failed.");
-      setGoogleLoading(false);
-    }
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+
+    if (error) throw error;
+  } catch (err) {
+    toast.error(
+      err instanceof Error ? err.message : "Google sign-in failed",
+    );
+    setGoogleLoading(false);
   }
+}
+ 
 
   if (!open) return null;
 
