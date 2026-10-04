@@ -17,6 +17,7 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
         ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
         ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : []),
       ];
+      
     const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Configure the Nexa Trade Mart Supabase environment.`;
       console.error(`[Supabase] ${message}`);
       throw new Error(message);
