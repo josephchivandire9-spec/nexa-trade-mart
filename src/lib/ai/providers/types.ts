@@ -11,3 +11,4 @@ export interface NexaAiProviderAdapter {
   readonly name: string;
   createModel(modelId?: string): LanguageModel;
 }
+ 
