@@ -1,33 +1,56 @@
 import type { LanguageModel } from "ai";
-import { createLovableModel } from "./providers/lovable";
 import { createGoogleModel } from "./providers/google";
 import { createOpenAIModel } from "./providers/openai";
 
-export type AiProviderName = "lovable" | "google" | "openai";
+/**
+ * Nexa Trade Mart AI
+ *
+ * This is the provider-independent AI layer owned by Nexa Trade Mart
+ * and powered by TJCOS.
+ *
+ * Google, OpenAI, and future providers are adapters only.
+ * The application must never depend directly on a provider.
+ */
+export type NexaAiProviderName = "google" | "openai";
 
 /**
- * Active provider, driven by env. Defaults to Google Gemini.
- * Rollback to the previous behaviour = set AI_PROVIDER=lovable (no code change).
+ * Returns the currently selected external provider adapter.
+ *
+ * The provider is infrastructure, not the identity of Nexa Trade Mart AI.
  */
-export function getAiProviderName(): AiProviderName {
+export function getNexaAiProviderName(): NexaAiProviderName {
   const raw = (process.env.AI_PROVIDER || "").toLowerCase().trim();
-  if (raw === "google" || raw === "openai" || raw === "lovable") return raw;
+
+  if (raw === "openai") {
+    return "openai";
+  }
+
   return "google";
 }
 
 /**
- * Returns the chat model for the active provider.
- * Callers must not import provider-specific modules directly.
+ * Nexa Trade Mart AI model gateway.
+ *
+ * Application code calls this function instead of calling Gemini,
+ * OpenAI, or another provider directly.
  */
-export function getChatModel(modelId?: string): LanguageModel {
-  const model = modelId || process.env.AI_MODEL || undefined;
-  switch (getAiProviderName()) {
-    case "google":
-      return createGoogleModel(model);
+export function getNexaAiModel(modelId?: string): LanguageModel {
+  const selectedModel = modelId || process.env.AI_MODEL || undefined;
+
+  switch (getNexaAiProviderName()) {
     case "openai":
-      return createOpenAIModel(model);
-    case "lovable":
+      return createOpenAIModel(selectedModel);
+
+    case "google":
     default:
-      return createLovableModel(model);
+      return createGoogleModel(selectedModel);
   }
 }
+
+/**
+ * Backward-compatible internal alias.
+ *
+ * Existing Nexa AI features can continue using getChatModel()
+ * while the provider implementation remains fully replaceable.
+ */
+export const getChatModel = getNexaAiModel;
