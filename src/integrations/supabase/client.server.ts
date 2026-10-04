@@ -14,7 +14,8 @@ function createSupabaseAdminClient() {
       ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
       ...(!SUPABASE_SERVICE_ROLE_KEY ? ['SUPABASE_SERVICE_ROLE_KEY'] : []),
     ];
-  const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Configure the Nexa Trade Mart Supabase environment.`;
+
+    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Configure the Nexa Trade Mart Supabase environment.`;
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }
