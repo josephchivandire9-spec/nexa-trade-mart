@@ -211,6 +211,8 @@ export type Database = {
           id: string
           items: Json
           notes: string | null
+          payment_method: string
+          payment_reference: string | null
           payment_status: string
           source: string | null
           status: string
@@ -228,6 +230,8 @@ export type Database = {
           id?: string
           items?: Json
           notes?: string | null
+          payment_method?: string
+          payment_reference?: string | null
           payment_status?: string
           source?: string | null
           status?: string
@@ -245,6 +249,8 @@ export type Database = {
           id?: string
           items?: Json
           notes?: string | null
+          payment_method?: string
+          payment_reference?: string | null
           payment_status?: string
           source?: string | null
           status?: string
@@ -439,6 +445,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      social_links: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          is_enabled: boolean
+          label: string
+          platform: string
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_enabled?: boolean
+          label: string
+          platform: string
+          sort_order?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_enabled?: boolean
+          label?: string
+          platform?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
       }
       testimonials: {
         Row: {
