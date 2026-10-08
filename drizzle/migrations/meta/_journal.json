@@ -8,6 +8,13 @@
       "when": 1791481240809,
       "tag": "0000_initial_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791481253171,
+      "tag": "0001_harden_roles_and_orders",
+      "breakpoints": true
     }
   ]
 }
