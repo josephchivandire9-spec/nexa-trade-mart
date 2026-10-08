@@ -122,16 +122,51 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          meta: Json | null
+          title: string
+          type: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          meta?: Json | null
+          title: string
+          type: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          meta?: Json | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
           customer_address: string | null
           customer_email: string | null
+          customer_id: string | null
           customer_name: string
           customer_phone: string
           id: string
           items: Json
           notes: string | null
+          payment_status: string
           source: string | null
           status: string
           subtotal: number
@@ -142,11 +177,13 @@ export type Database = {
           created_at?: string
           customer_address?: string | null
           customer_email?: string | null
+          customer_id?: string | null
           customer_name: string
           customer_phone: string
           id?: string
           items?: Json
           notes?: string | null
+          payment_status?: string
           source?: string | null
           status?: string
           subtotal?: number
@@ -157,11 +194,13 @@ export type Database = {
           created_at?: string
           customer_address?: string | null
           customer_email?: string | null
+          customer_id?: string | null
           customer_name?: string
           customer_phone?: string
           id?: string
           items?: Json
           notes?: string | null
+          payment_status?: string
           source?: string | null
           status?: string
           subtotal?: number
@@ -237,22 +276,31 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           created_at: string
           email: string | null
           full_name: string | null
           id: string
+          phone: string | null
+          updated_at: string
         }
         Insert: {
+          address?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
+          phone?: string | null
+          updated_at?: string
         }
         Update: {
+          address?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
+          phone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

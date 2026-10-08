@@ -15,6 +15,13 @@
       "when": 1791481253171,
       "tag": "0001_harden_roles_and_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791481267238,
+      "tag": "0002_profiles_orders_notifications",
+      "breakpoints": true
     }
   ]
 }
