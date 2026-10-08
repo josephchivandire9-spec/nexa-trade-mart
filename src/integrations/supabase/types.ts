@@ -262,9 +262,12 @@ export type Database = {
       }
       products: {
         Row: {
+          brand: string | null
           category_id: string | null
+          colours: Json
           compare_at_price: number | null
           created_at: string
+          delivery_info: string | null
           description: string | null
           discount_pct: number | null
           gallery: Json | null
@@ -274,15 +277,20 @@ export type Database = {
           is_featured: boolean
           name: string
           price: number
+          sizes: Json
           sku: string | null
           slug: string
+          specifications: Json
           stock: number
           updated_at: string
         }
         Insert: {
+          brand?: string | null
           category_id?: string | null
+          colours?: Json
           compare_at_price?: number | null
           created_at?: string
+          delivery_info?: string | null
           description?: string | null
           discount_pct?: number | null
           gallery?: Json | null
@@ -292,15 +300,20 @@ export type Database = {
           is_featured?: boolean
           name: string
           price: number
+          sizes?: Json
           sku?: string | null
           slug: string
+          specifications?: Json
           stock?: number
           updated_at?: string
         }
         Update: {
+          brand?: string | null
           category_id?: string | null
+          colours?: Json
           compare_at_price?: number | null
           created_at?: string
+          delivery_info?: string | null
           description?: string | null
           discount_pct?: number | null
           gallery?: Json | null
@@ -310,8 +323,10 @@ export type Database = {
           is_featured?: boolean
           name?: string
           price?: number
+          sizes?: Json
           sku?: string | null
           slug?: string
+          specifications?: Json
           stock?: number
           updated_at?: string
         }
